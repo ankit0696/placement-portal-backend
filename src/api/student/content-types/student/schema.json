@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "students",
+  "info": {
+    "singularName": "student",
+    "pluralName": "students",
+    "displayName": "Student",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "roll": {
+      "type": "uid"
+    },
+    "gender": {
+      "type": "enumeration",
+      "enum": [
+        "male",
+        "female",
+        "other"
+      ]
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "general",
+        "obc",
+        "sc",
+        "st",
+        "ews",
+        "pwd"
+      ]
+    },
+    "institute_email_id": {
+      "type": "email"
+    },
+    "personal_email_id": {
+      "type": "email"
+    },
+    "password": {
+      "type": "password"
+    },
+    "resume": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "files"
+      ]
+    },
+    "resume_link": {
+      "type": "string"
+    },
+    "mobile_number": {
+      "type": "biginteger"
+    },
+    "mobile_number_alternate": {
+      "type": "biginteger"
+    }
+  }
+}
