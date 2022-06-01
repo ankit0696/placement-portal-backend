@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_spi_details_spis",
+  "info": {
+    "displayName": "spi",
+    "icon": "database"
+  },
+  "options": {},
+  "attributes": {
+    "sem2": {
+      "type": "decimal"
+    },
+    "sem1": {
+      "type": "decimal"
+    },
+    "sem3": {
+      "type": "decimal"
+    },
+    "sem4": {
+      "type": "decimal"
+    },
+    "sem5": {
+      "type": "decimal"
+    },
+    "sem6": {
+      "type": "decimal"
+    }
+  }
+}

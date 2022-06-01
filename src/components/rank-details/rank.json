@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_rank_details_ranks",
+  "info": {
+    "displayName": "rank",
+    "icon": "id-badge"
+  },
+  "options": {},
+  "attributes": {
+    "all_india": {
+      "type": "integer"
+    },
+    "category_rank": {
+      "type": "integer"
+    },
+    "exam": {
+      "type": "enumeration",
+      "enum": [
+        "JEE",
+        "GATE"
+      ]
+    }
+  }
+}

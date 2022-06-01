@@ -83,6 +83,40 @@
     },
     "XII_percentage": {
       "type": "decimal"
+    },
+    "rank": {
+      "displayName": "rank",
+      "type": "component",
+      "repeatable": false,
+      "component": "rank-details.rank"
+    },
+    "registered_for": {
+      "type": "enumeration",
+      "enum": [
+        "FTE",
+        "Internship"
+      ]
+    },
+    "department": {
+      "type": "string"
+    },
+    "course": {
+      "type": "string"
+    },
+    "current_sem": {
+      "type": "integer"
+    },
+    "ug_college": {
+      "type": "string"
+    },
+    "ug_cpi": {
+      "type": "decimal"
+    },
+    "spi": {
+      "displayName": "spi",
+      "type": "component",
+      "repeatable": false,
+      "component": "spi-details.spi"
     }
   }
 }
