@@ -62,6 +62,27 @@
     },
     "mobile_number_alternate": {
       "type": "biginteger"
+    },
+    "program": {
+      "type": "enumeration",
+      "enum": [
+        "B.Tech",
+        "M.Tech",
+        "M.Sc",
+        "BS"
+      ]
+    },
+    "date_of_birth": {
+      "type": "date"
+    },
+    "approved": {
+      "type": "boolean"
+    },
+    "X_percentage": {
+      "type": "decimal"
+    },
+    "XII_percentage": {
+      "type": "decimal"
     }
   }
 }
