@@ -6,5 +6,11 @@ module.exports = {
       handler: "student.findMe",
       policies: [],
     },
+    {
+      method: "GET",
+      path: "/student/eligiblejobs",
+      handler: "student.getEligibleJobs",
+      policies: [],
+    }
   ],
 };

@@ -60,6 +60,18 @@
         "B1"
       ],
       "required": false
+    },
+    "min_X_percentage": {
+      "type": "decimal",
+      "min": 0,
+      "max": 100,
+      "default": 0
+    },
+    "min_XII_percentage": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0,
+      "max": 100
     }
   }
 }

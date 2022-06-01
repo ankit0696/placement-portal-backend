@@ -84,10 +84,16 @@
       "type": "boolean"
     },
     "X_percentage": {
-      "type": "decimal"
+      "type": "decimal",
+      "required": true,
+      "min": 0,
+      "max": 100
     },
     "XII_percentage": {
-      "type": "decimal"
+      "type": "decimal",
+      "max": 100,
+      "min": 0,
+      "required": true
     },
     "rank": {
       "displayName": "rank",
@@ -112,7 +118,8 @@
       "required": true
     },
     "current_sem": {
-      "type": "integer"
+      "type": "integer",
+      "min": 1
     },
     "ug_college": {
       "type": "string"
@@ -137,12 +144,12 @@
       "component": "applied-job-status.applied-job"
     },
     "profile_profile": {
-      "allowedTypes": [
-        "images"
-      ],
       "type": "media",
       "multiple": false,
-      "required": false
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
     },
     "activated": {
       "type": "boolean",
