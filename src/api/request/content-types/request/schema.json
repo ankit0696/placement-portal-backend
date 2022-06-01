@@ -4,7 +4,8 @@
   "info": {
     "singularName": "request",
     "pluralName": "requests",
-    "displayName": "request"
+    "displayName": "request",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -13,6 +14,18 @@
   "attributes": {
     "description": {
       "type": "text"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "job",
+        "student"
+      ]
+    },
+    "student": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::student.student"
     }
   }
 }

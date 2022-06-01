@@ -18,7 +18,9 @@
       "target": "api::company.company"
     },
     "job_title": {
-      "type": "string"
+      "type": "string",
+      "required": true,
+      "unique": true
     },
     "jaf": {
       "type": "media",
@@ -26,9 +28,7 @@
       "required": false,
       "allowedTypes": [
         "images",
-        "files",
-        "videos",
-        "audios"
+        "files"
       ]
     },
     "status": {
@@ -36,7 +36,9 @@
       "enum": [
         "active",
         "inactive"
-      ]
+      ],
+      "required": true,
+      "default": "inactive"
     },
     "job_status": {
       "type": "enumeration",
@@ -46,6 +48,18 @@
         "results declared",
         "abdanoned"
       ]
+    },
+    "last_date": {
+      "required": true,
+      "type": "datetime"
+    },
+    "classification": {
+      "type": "enumeration",
+      "enum": [
+        "A1",
+        "B1"
+      ],
+      "required": false
     }
   }
 }
