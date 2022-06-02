@@ -7,18 +7,6 @@ module.exports = {
       policies: [],
     },
     {
-      method: "GET",
-      path: "/student/eligiblejobs",
-      handler: "student.getEligibleJobs",
-      policies: [],
-    },
-    {
-      method: "POST",
-      path: "/student/register",
-      handler: "student.register",
-      policies: []
-    },
-    {
       method: "POST",
       path: "/student/submit-for-approval",
       handler: "student.submit_for_approval",
@@ -29,6 +17,18 @@ module.exports = {
       path: "/student/modify",
       handler: "student.modify_multiple",
       policies: []
-    }
+    },
+    {
+      method: "GET",
+      path: "/student/eligiblejobs",
+      handler: "job.get_eligible_jobs",
+      policies: [],
+    },
+    {
+      method: "POST",
+      path: "/student/register",
+      handler: "auth.register",
+      policies: []
+    },
   ],
 };
