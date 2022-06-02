@@ -8,7 +8,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -48,7 +48,9 @@
       "type": "email"
     },
     "password": {
-      "type": "password"
+      "type": "password",
+      "required": true,
+      "private": true
     },
     "resume": {
       "type": "media",

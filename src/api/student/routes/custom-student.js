@@ -11,6 +11,12 @@ module.exports = {
       path: "/student/eligiblejobs",
       handler: "student.getEligibleJobs",
       policies: [],
-    }
+    },
+    {
+      method: "POST",
+      path: "/student/register",
+      handler: "student.register",
+      policies: []
+    },
   ],
 };
