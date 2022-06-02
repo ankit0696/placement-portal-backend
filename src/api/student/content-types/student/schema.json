@@ -8,38 +8,34 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
     "name": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "roll": {
-      "type": "uid",
-      "required": true
+      "type": "uid"
     },
     "gender": {
       "type": "enumeration",
       "enum": [
-        "Male",
-        "Female",
-        "Others"
-      ],
-      "required": true
+        "male",
+        "female",
+        "other"
+      ]
     },
     "category": {
       "type": "enumeration",
       "enum": [
-        "General",
-        "OBC",
-        "SC",
-        "ST",
+        "general",
+        "obc",
+        "sc",
+        "st",
         "ews",
         "pwd"
-      ],
-      "required": true
+      ]
     },
     "institute_email_id": {
       "type": "email"
@@ -48,9 +44,7 @@
       "type": "email"
     },
     "password": {
-      "type": "password",
-      "required": true,
-      "private": true
+      "type": "password"
     },
     "resume": {
       "type": "media",
@@ -63,10 +57,10 @@
     "resume_link": {
       "type": "string"
     },
-    "mobile_number": {
+    "mobile_number_1": {
       "type": "biginteger"
     },
-    "mobile_number_alternate": {
+    "mobile_number_2": {
       "type": "biginteger"
     },
     "program": {
@@ -76,58 +70,22 @@
         "M.Tech",
         "M.Sc",
         "BS"
-      ],
-      "required": true
+      ]
     },
     "date_of_birth": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "X_percentage": {
-      "type": "decimal",
-      "required": true,
-      "min": 0,
-      "max": 100
+      "type": "decimal"
     },
     "XII_percentage": {
-      "type": "decimal",
-      "max": 100,
-      "min": 0,
-      "required": true
-    },
-    "registered_for": {
-      "type": "enumeration",
-      "enum": [
-        "FTE",
-        "Internship"
-      ],
-      "required": true
-    },
-    "department": {
-      "type": "string",
-      "required": true
-    },
-    "course": {
-      "type": "string",
-      "required": true
-    },
-    "current_sem": {
-      "type": "integer",
-      "min": 1
-    },
-    "ug_college": {
-      "type": "string"
-    },
-    "ug_cpi": {
       "type": "decimal"
     },
     "rank": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "categoryRank": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "admission_year": {
       "type": "string"
@@ -140,51 +98,6 @@
         "approved",
         "rejected"
       ]
-    },
-    "spi": {
-      "displayName": "spi",
-      "type": "component",
-      "repeatable": false,
-      "component": "spi-details.spi"
-    },
-    "cpi": {
-      "type": "decimal",
-      "required": true
-    },
-    "applied_jobs": {
-      "displayName": "Applied Job",
-      "type": "component",
-      "repeatable": true,
-      "component": "applied-job-status.applied-job"
-    },
-    "profile_profile": {
-      "type": "media",
-      "multiple": false,
-      "required": false,
-      "allowedTypes": [
-        "images"
-      ]
-    },
-    "activated": {
-      "type": "boolean",
-      "default": true
-    },
-    "other_achievements": {
-      "type": "text"
-    },
-    "placed_status": {
-      "type": "boolean",
-      "default": false
-    },
-    "projects": {
-      "displayName": "Project",
-      "type": "component",
-      "repeatable": true,
-      "component": "project.project"
-    },
-    "address": {
-      "type": "text",
-      "required": true
     }
   }
 }
