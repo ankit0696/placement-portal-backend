@@ -122,10 +122,12 @@
       "type": "decimal"
     },
     "rank": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "categoryRank": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "admission_year": {
       "type": "string"
