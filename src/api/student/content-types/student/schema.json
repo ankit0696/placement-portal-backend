@@ -75,14 +75,29 @@
     "date_of_birth": {
       "type": "date"
     },
-    "approved": {
-      "type": "boolean"
-    },
     "X_percentage": {
       "type": "decimal"
     },
     "XII_percentage": {
       "type": "decimal"
+    },
+    "rank": {
+      "type": "string"
+    },
+    "categoryRank": {
+      "type": "string"
+    },
+    "admission_year": {
+      "type": "string"
+    },
+    "approved": {
+      "type": "enumeration",
+      "enum": [
+        "created",
+        "pending",
+        "approved",
+        "rejected"
+      ]
     }
   }
 }
