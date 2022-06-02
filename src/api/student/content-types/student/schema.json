@@ -75,10 +75,10 @@
     "date_of_birth": {
       "type": "date"
     },
-    "X_percentage": {
+    "X_marks": {
       "type": "decimal"
     },
-    "XII_percentage": {
+    "XII_marks": {
       "type": "decimal"
     },
     "rank": {
@@ -97,6 +97,53 @@
         "pending",
         "approved",
         "rejected"
+      ]
+    },
+    "spi_1": {
+      "type": "string"
+    },
+    "spi_2": {
+      "type": "string"
+    },
+    "spi_3": {
+      "type": "string"
+    },
+    "spi_4": {
+      "type": "string"
+    },
+    "spi_5": {
+      "type": "string"
+    },
+    "spi_6": {
+      "type": "string"
+    },
+    "spi_7": {
+      "type": "string"
+    },
+    "spi_8": {
+      "type": "string"
+    },
+    "cpi": {
+      "type": "string"
+    },
+    "bachelor_marks": {
+      "type": "string"
+    },
+    "master_marks": {
+      "type": "string"
+    },
+    "department": {
+      "type": "enumeration",
+      "enum": [
+        "mathematics",
+        "computer science "
+      ]
+    },
+    "course": {
+      "type": "enumeration",
+      "enum": [
+        "Mathematics & Computing",
+        "Mechatronics"
       ]
     }
   }
