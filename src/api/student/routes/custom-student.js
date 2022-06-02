@@ -23,6 +23,12 @@ module.exports = {
       path: "/student/submit-for-approval",
       handler: "student.submit_for_approval",
       policies: []
+    },
+    {
+      method: "PUT",
+      path: "/student/modify",
+      handler: "student.modify_multiple",
+      policies: []
     }
   ],
 };
