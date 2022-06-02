@@ -95,13 +95,6 @@
       "min": 0,
       "required": true
     },
-    "rank": {
-      "displayName": "rank",
-      "type": "component",
-      "repeatable": false,
-      "component": "rank-details.rank",
-      "required": true
-    },
     "registered_for": {
       "type": "enumeration",
       "enum": [
@@ -128,7 +121,6 @@
     "ug_cpi": {
       "type": "decimal"
     },
-<<<<<<< HEAD
     "rank": {
       "type": "string"
     },
@@ -146,7 +138,7 @@
         "approved",
         "rejected"
       ]
-=======
+    },
     "spi": {
       "displayName": "spi",
       "type": "component",
@@ -191,7 +183,6 @@
     "address": {
       "type": "text",
       "required": true
->>>>>>> 232c3e9bd75f7512f994453a121baa6c298f6e74
     }
   }
 }
