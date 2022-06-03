@@ -43,9 +43,6 @@
     "personal_email_id": {
       "type": "email"
     },
-    "password": {
-      "type": "password"
-    },
     "resume": {
       "type": "media",
       "multiple": false,

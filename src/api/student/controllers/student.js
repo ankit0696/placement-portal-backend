@@ -30,40 +30,48 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     ctx.body = data;
   },
 
+  /** Authentication is needed for this 
+   *
+   ** Requires request body to be exactly same as if passed to POST request to usual create entry through strapi REST api
+   * ie. ctx.request.body should be like: { data:{"name":"Koi","roll": "1905050"} }
+   *
+   * Using this also ensures some pre-save checks, such as approved MUST not be able to set by student
+   */
   async submit_for_approval(ctx) {
-    const user = ctx.state.user;
-
-    if (!user) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
-    }
-
-    const data = await strapi.db.query("api::student.student").update({
-      where: {
-        roll: user.username,
-      },
-      data: {
-        approved: "pending"
-      },
-      select: ["roll", "approved", "id"]
-    });
+    const { data } = ctx.request.body;
 
     if (!data) {
-      return ctx.internalServerError(null, [{ messages: [{ id: "Failed to update student's approval status" }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
+    // Ensure, sender did not sender with "approved: approved"
+    data["approved"] = "pending";
 
-    const request = await strapi.db.query("api::request.request").create({
-      data: {
-        description: "Request for student approval",
-        type: "student",
-        student: data.id
+    try {
+      const student = await strapi.db.query("api::student.student").create({ data });
+
+      if (!student) {
+        return ctx.internalServerError(null, [{ messages: [{ id: "Failed to update student's approval status" }] }]);
       }
-    });
 
-    if (!request) {
-      return ctx.internalServerError(null, [{ messages: [{ id: "Failed to create student approval request" }] }]);
+      /* TODO: This is redundant I think, can easily be done by filtering students based on: {where: {approved: "pending"}} */
+      const request = await strapi.db.query("api::request.request").create({
+        data: {
+          description: "Request for student approval",
+          type: "student",
+          student: student.id
+        }
+      });
+
+      if (!request) {
+        return ctx.internalServerError(null, [{ messages: [{ id: "Failed to create student approval request" }] }]);
+      }
+
+      ctx.body = student;
+
+    } catch (err) {
+      console.log(err.message);
+      ctx.badRequest(null, [{messages: [{id: "Failed to create student"}]}]);
     }
-
-    ctx.body = request;
   },
 
   /* Route to modify given keys for the current user */

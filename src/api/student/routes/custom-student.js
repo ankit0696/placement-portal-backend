@@ -24,11 +24,5 @@ module.exports = {
       handler: "job.get_eligible_jobs",
       policies: [],
     },
-    {
-      method: "POST",
-      path: "/student/register",
-      handler: "auth.register",
-      policies: []
-    },
   ],
 };
