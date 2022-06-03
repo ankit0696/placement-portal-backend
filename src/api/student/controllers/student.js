@@ -38,6 +38,13 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * Using this also ensures some pre-save checks, such as approved MUST not be able to set by student
    */
   async submit_for_approval(ctx) {
+    const user = ctx.state.user;
+
+    /* This is needed since only a signed in student should be able to send this + We need user.id later */
+    if (!user || !(user.username)) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
+    }
+
     const { data } = ctx.request.body;
 
     if (!data) {
@@ -45,6 +52,9 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
+
+    // Give user id of related entry in Users collection, used for auth
+    data["user_relation"] = user.id; 
 
     try {
       const student = await strapi.db.query("api::student.student").create({ data });
