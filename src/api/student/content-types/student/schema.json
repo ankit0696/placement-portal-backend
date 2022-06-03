@@ -145,6 +145,10 @@
         "Mathematics & Computing",
         "Mechatronics"
       ]
+    },
+    "address": {
+      "type": "text",
+      "required": true
     }
   }
 }

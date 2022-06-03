@@ -18,6 +18,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "No user found" }] }]);
     }
     const data = await strapi.db.query("api::student.student").findOne({
+      populate: true,
       where: {
         roll: user.username,
       },
