@@ -48,15 +48,15 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
 
-    if(data["roll"] != user.username) {
-      return ctx.badRequest(null, [{messages, [{id: "Username does not match with roll number"}]}]);
+    if (data["roll"] != user.username) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
 
     // Give user id of related entry in Users collection, used for auth
-    data["user_relation"] = user.id; 
+    data["user_relation"] = user.id;
 
     try {
       const student = await strapi.db.query("api::student.student").create({ data });
@@ -82,7 +82,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     } catch (err) {
       console.log(err.message);
-      ctx.badRequest(null, [{messages: [{id: "Failed to create student"}]}]);
+      ctx.badRequest(null, [{ messages: [{ id: "Failed to create student" }] }]);
     }
   },
 
