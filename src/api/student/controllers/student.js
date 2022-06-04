@@ -23,9 +23,6 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
         roll: user.username,
       },
     });
-    if (!data) {
-      return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
-    }
 
     ctx.body = data;
   },
