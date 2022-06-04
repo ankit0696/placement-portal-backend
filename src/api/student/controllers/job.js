@@ -1,11 +1,11 @@
 'use strict';
 
 module.exports = {
-  /**
-   * @description Searches the jobs db to look for eligible jobs for current student
-   * @returns Array of job objects, each object containing detail for one job
-   */
-   async get_eligible_jobs(ctx) {
+    /**
+     * @description Searches the jobs db to look for eligible jobs for current student
+     * @returns Array of job objects, each object containing detail for one job
+     */
+    async get_eligible_jobs(ctx) {
         const user = ctx.state.user;
 
         if (!user) {
@@ -15,13 +15,17 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["X_percentage", "XII_percentage"]
+            select: ["approved", "X_percentage", "XII_percentage"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { X_percentage, XII_percentage } = student_self;
+        const { approved, X_percentage, XII_percentage } = student_self;
+
+        if (approved !== "approved") {
+            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
 
         const eligible_jobs = await strapi.db.query("api::job.job").findMany({
             where: {

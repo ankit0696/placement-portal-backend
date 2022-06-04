@@ -86,7 +86,11 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
   },
 
-  /* Route to modify given keys for the current user */
+  /**
+   * Route to modify given keys for the current user
+   * Note1: Requires authentication
+   * Note2: Most fields cannot be updated after student clicks "Submit for approval"
+   */
   async modify_multiple(ctx) {
     const user = ctx.state.user;
 
@@ -125,7 +129,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // should include atleast ALL optional fields
     const fields_allowed_anytime = [
-      "other_achievements", "projects", "profile_profile", "current_sem", "rank"
+      "other_achievements", "projects", "profile_picture", "current_sem", "rank"
     ];
 
     // fields that cannot be changed, for password, use forget password
@@ -136,10 +140,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     const fields_to_modify = {};
     for (const field in data) {
       // These fields will only be added to `fields_to_modify` if account is not already approved/rejected
-      if (
-        fields_allowed_before_approval.includes(field) &&
-        (approved === "created" || approved === "pending")) {
-        fields_to_modify[field] = data[field];
+      if (fields_allowed_before_approval.includes(field) == true) {
+        continue; // skip modifying fiels that are not allowed after "Submit for approval"
       }
       else if (fields_allowed_anytime.includes(field)) {
         fields_to_modify[field] = data[field];
