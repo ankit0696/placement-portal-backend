@@ -47,6 +47,11 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     if (!data) {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
+
+    if(data["roll"] != user.username) {
+      return ctx.badRequest(null, [{messages, [{id: "Username does not match with roll number"}]}]);
+    }
+
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
 
