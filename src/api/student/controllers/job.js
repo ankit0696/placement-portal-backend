@@ -27,6 +27,51 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
         }
 
+        console.log({X_marks,XII_marks});
+        const eligible_jobs = await strapi.db.query("api::job.job").findMany({
+            where: {
+                min_X_marks: {
+                    $lte: X_marks
+                },
+                min_XII_marks: {
+                    $lte: XII_marks
+                }
+            },
+            populate: ["company"]
+        });
+
+        ctx.body = eligible_jobs;
+    },
+
+    /**
+     * @description Apply to a job passing the job id
+     * @returns 200 status on success, else error codes possibly with a body {messsages: [{id:'msg'}]}
+     */
+    async apply_to_job(ctx) {
+        const user = ctx.state.user;
+
+        if (!user) {
+            return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
+        }
+
+        // console.log()
+        const student_self = await strapi.db.query("api::student.student").findOne({
+            where: {
+                roll: user.username,
+            },
+            select: ["approved", "X_marks", "XII_marks"]
+        });
+        if (!student_self) {
+            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
+        }
+
+        const { approved, X_marks, XII_marks } = student_self;
+
+        if (approved !== "approved") {
+            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        console.log({X_marks,XII_marks});
         const eligible_jobs = await strapi.db.query("api::job.job").findMany({
             where: {
                 min_X_marks: {

@@ -15,3 +15,6 @@
 * Admin: Disallow registrations
 * Admin: Common collection for things like allow student registrations or allow CPI change by all students
 * Admin: Approving multiple students at a time
+
+* upload on modify route
+* applied jobs
