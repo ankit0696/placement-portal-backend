@@ -15,13 +15,13 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["approved", "X_marks", "XII_marks"]
+            select: ["id", "approved", "X_marks", "XII_marks"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { approved, X_marks, XII_marks } = student_self;
+        const { id, approved, X_marks, XII_marks } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -38,6 +38,23 @@ module.exports = {
             },
             populate: ["company", "jaf"]
         });
+
+        if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
+            return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
+        }
+
+        eligible_jobs.filter(async job => {
+            const existing_application = await strapi.db.query("api::application.application").findOne({
+                student: id,
+                job: job.id
+            });
+
+            if (!existing_application) {
+                // Already applied
+                return false;
+            }
+            return true;
+        })
 
         ctx.body = eligible_jobs;
     },
