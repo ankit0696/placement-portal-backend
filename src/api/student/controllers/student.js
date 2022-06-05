@@ -166,4 +166,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // NOTE: Returning error as it is, may include sensitive data, or modified fields
     ctx.body = modified_fields;
   },
+
+  async upload(ctx) {
+    const body = ctx.body;
+  }
 }));

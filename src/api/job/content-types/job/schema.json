@@ -24,7 +24,7 @@
     },
     "jaf": {
       "type": "media",
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "allowedTypes": [
         "images",
@@ -78,7 +78,8 @@
       "enum": [
         "Internship",
         "FTE"
-      ]
+      ],
+      "required": true
     }
   }
 }

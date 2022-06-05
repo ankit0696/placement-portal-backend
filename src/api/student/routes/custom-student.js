@@ -20,6 +20,12 @@ module.exports = {
     },
     {
       method: "GET",
+      path: "/student/alljobs",
+      handler: "job.get_all_jobs",
+      policies: [],
+    },
+    {
+      method: "GET",
       path: "/student/eligiblejobs",
       handler: "job.get_eligible_jobs",
       policies: [],
