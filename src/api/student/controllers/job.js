@@ -27,7 +27,7 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
         }
 
-        const eligible_jobs = await strapi.db.query("api::job.job").findMany({
+        let eligible_jobs = await strapi.db.query("api::job.job").findMany({
             where: {
                 min_X_marks: {
                     $lte: X_marks
@@ -43,18 +43,25 @@ module.exports = {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
         }
 
-        eligible_jobs.filter(async job => {
+        /**
+         * `exists` is an array of bools, representing whether a job has been already applied for
+         * 
+         * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
+         */
+        const exists = await Promise.all(eligible_jobs.map(async (job) => {
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 student: id,
                 job: job.id
             });
 
             if (!existing_application) {
-                // Already applied
-                return false;
+                // Not yet applied
+                return true;
             }
-            return true;
-        })
+            return false;
+        }));
+
+        eligible_jobs = eligible_jobs.filter((_, index) => exists[index]);
 
         ctx.body = eligible_jobs;
     },
