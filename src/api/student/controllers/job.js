@@ -125,6 +125,15 @@ module.exports = {
         }
 
         if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && (Date.now() <= job.last_date)) {
+            const existing_application = await strapi.db.query("api::application.application").findOne({
+                student: id,
+                job: query.jobId
+            });
+
+            if (!existing_application) {
+                return ctx.badRequest(null, [{ messages: [{ id: "Already applied" }] }]);
+            }
+
             const application = await strapi.db.query("api::application.application").create({
                 data: {
                     status: "applied",
@@ -176,7 +185,7 @@ module.exports = {
             where: {
                 student: id,
             },
-            populate: true
+            populate: ["student", "job.company"]
         });
 
         ctx.body = applied_jobs;
