@@ -72,6 +72,13 @@
       "default": 0,
       "min": 0,
       "max": 100
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "Internship",
+        "FTE"
+      ]
     }
   }
 }

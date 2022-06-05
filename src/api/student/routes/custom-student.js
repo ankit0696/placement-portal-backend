@@ -24,5 +24,11 @@ module.exports = {
       handler: "job.get_eligible_jobs",
       policies: [],
     },
+    {
+      method: "POST",
+      path: "/student/apply",
+      handler: "job.apply_to_job",
+      policies: [],
+    }
   ],
 };

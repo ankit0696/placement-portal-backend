@@ -106,7 +106,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     /* Request body is expected to be exactly same as if it was a POST request to create entry through strapi REST api
      * ie. ctx.request.body should be like: { data:{"cpi": 34} }
      */
-    console.log(ctx.request.body);
+    console.log({body: ctx.request.body, files: ctx.request.files, query: ctx.query});
 
     const data = ctx.request.body;
     if (!data || typeof (data) !== "object") {
