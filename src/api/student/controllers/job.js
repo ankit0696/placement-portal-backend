@@ -15,13 +15,13 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["id", "approved", "X_marks", "XII_marks"]
+            select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { id, approved, X_marks, XII_marks } = student_self;
+        const { id, approved, X_marks, XII_marks, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -34,7 +34,11 @@ module.exports = {
                 },
                 min_XII_marks: {
                     $lte: XII_marks
-                }
+                },
+                last_date: {
+                    $gte: Date.now()
+                },
+                category: registered_for
             },
             populate: ["company", "jaf"]
         });
@@ -125,13 +129,13 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["id", "approved", "X_marks", "XII_marks"]
+            select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { id, approved, X_marks, XII_marks } = student_self;
+        const { id, approved, X_marks, XII_marks, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -148,7 +152,7 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
         }
 
-        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && (Date.now() <= job.last_date)) {
+        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && (Date.now() <= job.last_date) && registered_for == job.category) {
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 student: id,
                 job: query.jobId
