@@ -29,6 +29,12 @@ module.exports = {
       path: "/student/apply",
       handler: "job.apply_to_job",
       policies: [],
+    },
+    {
+      method: "GET",
+      path: "/student/applied-jobs",
+      handler: "job.get_applied_jobs",
+      policies: [],
     }
   ],
 };

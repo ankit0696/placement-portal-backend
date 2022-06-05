@@ -45,6 +45,7 @@ module.exports = {
     /**
      * @description Apply to a job passing the job id
      * @example http://localhost:1337/api/student/apply?jobId=2
+     * @note requires authentication
      * @returns 200 status on success, else error codes possibly with a body {messsages: [{id:'msg'}]}
      */
     async apply_to_job(ctx) {
@@ -105,6 +106,43 @@ module.exports = {
         } else {
             return ctx.badRequest(null, [{ messages: [{ id: "Not eligible" }] }]);
         }
-    }
+    },
 
+    /**
+     * @description Searches the applications collection to look for applied jobs for current student
+     * @example http://localhost:1337/api/student/applied-jobs
+     * @note requires authentication
+     * @returns Array of applications, each object containing application for one job
+     */
+     async get_applied_jobs(ctx) {
+        const user = ctx.state.user;
+
+        if (!user) {
+            return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
+        }
+        const student_self = await strapi.db.query("api::student.student").findOne({
+            where: {
+                roll: user.username,
+            },
+            select: ["id", "approved"]
+        });
+        if (!student_self) {
+            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
+        }
+
+        const { id, approved } = student_self;
+
+        if (approved !== "approved") {
+            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        const applied_jobs = await strapi.db.query("api::application.application").findMany({
+            where: {
+                student: id,
+            },
+            populate: true
+        });
+
+        ctx.body = applied_jobs;
+    },
 };
