@@ -124,7 +124,7 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
         }
 
-        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks) {
+        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && (Date.now() <= job.last_date)) {
             const application = await strapi.db.query("api::application.application").create({
                 data: {
                     status: "applied",
