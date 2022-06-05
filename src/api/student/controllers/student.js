@@ -88,8 +88,13 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
   /**
    * Route to modify given keys for the current user
-   * Note1: Requires authentication
-   * Note2: Most fields cannot be updated after student clicks "Submit for approval"
+   * 
+   * NOTE1: request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
+   * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050" }, ie. NOT like { "data": {"name": "koi"} }
+   * This was made to accomodate both types of input, as body and form-data
+   *
+   * Note2: Requires authentication
+   * Note3: Most fields cannot be updated after student clicks "Submit for approval"
    */
   async modify_multiple(ctx) {
     const user = ctx.state.user;
@@ -101,7 +106,9 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     /* Request body is expected to be exactly same as if it was a POST request to create entry through strapi REST api
      * ie. ctx.request.body should be like: { data:{"cpi": 34} }
      */
-    const { data } = ctx.request.body;
+    console.log(ctx.request.body);
+
+    const data = ctx.request.body;
     if (!data || typeof (data) !== "object") {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
@@ -110,7 +117,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {
         roll: user.username,
       },
-      select: ["approved", "activated"]
+    select: ["approved"/*, "activated"*/]
     });
     if (!student_data) {
       // Returning 500, since this should not fail, it's just reading data of an existing user (as they have been provided the JWT)
@@ -123,13 +130,13 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // CPI can be updated when allowed by admin
     const fields_allowed_before_approval = [
       "name", "roll", "gender", "date_of_birth", "category", "rank", "registered_for", "program",
-      "department", "course", "address", "spi", "cpi", "X_percentage", "XII_percentage",
+      "department", "course", "address", "spi", "cpi", "X_marks", "XII_marks",
       "ug_college", "ug_cpi",
     ];
 
     // should include atleast ALL optional fields
     const fields_allowed_anytime = [
-      "other_achievements", "projects", "profile_picture", "current_sem", "rank"
+      "resume", "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
     ];
 
     // fields that cannot be changed, for password, use forget password

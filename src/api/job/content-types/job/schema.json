@@ -61,13 +61,13 @@
       ],
       "required": false
     },
-    "min_X_percentage": {
+    "min_X_marks": {
       "type": "decimal",
       "min": 0,
       "max": 100,
       "default": 0
     },
-    "min_XII_percentage": {
+    "min_XII_marks": {
       "type": "decimal",
       "default": 0,
       "min": 0,

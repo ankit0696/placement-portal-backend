@@ -15,13 +15,13 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["approved", "X_percentage", "XII_percentage"]
+            select: ["approved", "X_marks", "XII_marks"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { approved, X_percentage, XII_percentage } = student_self;
+        const { approved, X_marks, XII_marks } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -29,11 +29,11 @@ module.exports = {
 
         const eligible_jobs = await strapi.db.query("api::job.job").findMany({
             where: {
-                min_X_percentage: {
-                    $lte: X_percentage
+                min_X_marks: {
+                    $lte: X_marks
                 },
-                min_XII_percentage: {
-                    $lte: XII_percentage
+                min_XII_marks: {
+                    $lte: XII_marks
                 }
             }
         });
