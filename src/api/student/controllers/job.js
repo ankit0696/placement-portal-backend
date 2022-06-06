@@ -213,7 +213,7 @@ module.exports = {
             where: {
                 student: id,
             },
-            populate: ["student", "job.company"]
+            populate: ["student", "job.company", "job.jaf"]
         });
 
         ctx.body = applied_jobs;
