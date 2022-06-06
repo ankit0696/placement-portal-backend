@@ -13,6 +13,7 @@ module.exports = {
       policies: []
     },
     {
+      /** NOTE: Take special care of updating field names in this student.modify_multiple route, on every change to student schema :) */
       method: "PUT",
       path: "/student/modify",
       handler: "student.modify_multiple",
@@ -41,6 +42,6 @@ module.exports = {
       path: "/student/applied-jobs",
       handler: "job.get_applied_jobs",
       policies: [],
-    }
+    },
   ],
 };

@@ -90,7 +90,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * Route to modify given keys for the current user
    * 
    * NOTE1: request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
-   * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050" }, ie. NOT like { "data": {"name": "koi"} }
+   * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050","resume": File }, ie. NOT like { "data": {"name": "koi"} }
    * This was made to accomodate both types of input, as body and form-data
    *
    * Note2: Requires authentication
@@ -103,13 +103,10 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
 
-    /* Request body is expected to be exactly same as if it was a POST request to create entry through strapi REST api
-     * ie. ctx.request.body should be like: { data:{"cpi": 34} }
-     */
-    console.log({body: ctx.request.body, files: ctx.request.files, query: ctx.query});
+    // console.log("Starting: ", { body: ctx.request.body, files: ctx.request.files, query: ctx.query });
 
-    const data = ctx.request.body;
-    if (!data || typeof (data) !== "object") {
+    const body = ctx.request.body;
+    if (!body || typeof (body) !== "object") {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
 
@@ -117,14 +114,14 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {
         roll: user.username,
       },
-    select: ["approved"/*, "activated"*/]
+      select: ["id", "approved"/*, "activated"*/]
     });
     if (!student_data) {
       // Returning 500, since this should not fail, it's just reading data of an existing user (as they have been provided the JWT)
       return ctx.internalServerError(null, [{ messages: [{ id: "Failed to fetch student data" }] }]);
     }
 
-    const { approved, acivated } = student_data;
+    const { id, approved } = student_data;
 
     // Most mandatory components locked after approval of the profile (ie. only allowed to change before approval).
     // CPI can be updated when allowed by admin
@@ -145,29 +142,55 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // for changing password, use forgot password
     // NOTE2: Other approach can be allowing all except some
     const fields_to_modify = {};
-    for (const field in data) {
+    for (const field in body) {
       // These fields will only be added to `fields_to_modify` if account is not already approved/rejected
       if (fields_allowed_before_approval.includes(field) == true) {
         continue; // skip modifying fiels that are not allowed after "Submit for approval"
       }
       else if (fields_allowed_anytime.includes(field)) {
-        fields_to_modify[field] = data[field];
+        fields_to_modify[field] = body[field];
       }
     }
 
-    const modified_fields = await strapi.db.query("api::student.student").update({
-      where: {
-        roll: user.username,
-      },
-      data: fields_to_modify,
-      select: ["roll", ...Object.keys(fields_to_modify)]
-    });
+    /** All fields that take media
+     * WHY: It is needed since from backend we are taking keys as, eg. "resume", but strapi's
+     * update route requires this to be "files.resume", so instead of depending on frontend to
+     * do this, I am separating this strapi-dependent logic from frontend, so this array will
+     * be used to rename all media fields adding "files." to the beginning
+     * 
+     * NOTE: This needs to be updated with every media field added to student schema
+     */
+    const media_fields = ["resume"];
+    const files_to_upload = {};
+    for(const field in (ctx.request.files || {})) {
+      if(media_fields.includes(field)) {
+        files_to_upload[`files.${field}`] = ctx.request.files[field];
+      }
+    }
+    ctx.request.files = files_to_upload;
 
-    // NOTE: Returning error as it is, may include sensitive data, or modified fields
-    ctx.body = modified_fields;
+    // Modifying ctx.params according to input format taken by this.update function
+    if (!ctx.params) {
+      ctx.params = {};
+    }
+    ctx.params["id"] = id;
+
+    // NOTE: Not allowing any user given query to pass through
+    ctx.request.query = {};
+
+    ctx.request.body = {
+      // NOTE: Internally, strapi expects body["data"] to be a string like "{'data': {'key1:'3434','key2':6}}"
+      data: JSON.stringify(fields_to_modify)
+    };
+
+    // console.log("Just before update: ", { body: ctx.request.body, files: ctx.request.files });
+
+    if (fields_to_modify === {}) {
+      ctx.response.status = 204;
+      return ctx.body = "No field modified";
+    } else {
+      // Pass to the `update` callback to handle request
+      return this.update(ctx);
+    }
   },
-
-  async upload(ctx) {
-    const body = ctx.body;
-  }
 }));
