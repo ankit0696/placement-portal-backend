@@ -120,7 +120,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // should include atleast ALL optional fields
     const fields_allowed_anytime = [
-      "resume", "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
+      "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
     ];
 
     // fields that cannot be changed, for password, use forget password
@@ -147,7 +147,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
      * 
      * NOTE: This needs to be updated with every media field added to student schema
      */
-    const media_fields = ["resume"];
+    const media_fields = ["resume", "profile_pic"];
     const files_to_upload = {};
     for(const field in (ctx.request.files || {})) {
       if(media_fields.includes(field)) {
