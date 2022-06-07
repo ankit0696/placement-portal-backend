@@ -65,19 +65,6 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
         return ctx.internalServerError(null, [{ messages: [{ id: "Failed to update student's approval status" }] }]);
       }
 
-      /* TODO: This is redundant I think, can easily be done by filtering students based on: {where: {approved: "pending"}} */
-      const request = await strapi.db.query("api::request.request").create({
-        data: {
-          description: "Request for student approval",
-          type: "student",
-          student: student.id
-        }
-      });
-
-      if (!request) {
-        return ctx.internalServerError(null, [{ messages: [{ id: "Failed to create student approval request" }] }]);
-      }
-
       ctx.body = student;
 
     } catch (err) {
@@ -177,6 +164,13 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // NOTE: Not allowing any user given query to pass through
     ctx.request.query = {};
+
+    console.log("Earlier, ctx.query", {q: ctx.query});
+
+    // NOTE: Internally in strapi this 1 signifies replaceFile, it is like this in
+    // node_modules/@strapi/plugin-upload/server/controllers/content-api.js
+    // await (ctx.query.id ? this.replaceFile : this.uploadFiles)(ctx);
+    // ctx.query = {id: 1, ...ctx.query};
 
     ctx.request.body = {
       // NOTE: Internally, strapi expects body["data"] to be a string like "{'data': {'key1:'3434','key2':6}}"
