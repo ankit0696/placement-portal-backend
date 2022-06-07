@@ -14,9 +14,15 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   async findMe(ctx) {
     const user = ctx.state.user;
 
+    // Can use this if using this.findOne, instead of quering by self, Since the context will be passed to this.findOne, passing populate: * to populate all fields
+    // But not doing that since even for this.findOne we require student.id for which atleast one query is eitherway required
+    // console.log({ query: ctx.request.query });
+    // ctx.request.query = { "populate": "*", filter: "id=1" ...ctx.request.query };
+
     if (!user) {
-      return ctx.badRequest(null, [{ messages: [{ id: "No user found" }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
+    // TODO: Possible reduce all populate: "*" with only required fields to be populated :)
     const data = await strapi.db.query("api::student.student").findOne({
       populate: true,
       where: {

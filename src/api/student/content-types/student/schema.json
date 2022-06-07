@@ -38,10 +38,12 @@
       ]
     },
     "institute_email_id": {
-      "type": "email"
+      "type": "email",
+      "unique": true
     },
     "personal_email_id": {
-      "type": "email"
+      "type": "email",
+      "unique": true
     },
     "resume": {
       "type": "media",
@@ -161,11 +163,12 @@
       "required": true
     },
     "profile_pic": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
     }
   }
 }
