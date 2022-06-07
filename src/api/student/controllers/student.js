@@ -29,12 +29,20 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
   /** Authentication is needed for this 
    *
-   ** Requires request body to be exactly same as if passed to POST request to usual create entry through strapi REST api
-   * ie. ctx.request.body should be like: { data:{"name":"Koi","roll": "1905050"} }
+   * Note: Send data in multipart (eg. form-data), as that allows for uploading files too
+   * 
+   ** Requires request body is DIFFERENT than if passed to POST request to usual create entry through strapi REST api
+   * ie. ctx.request.body should be like: "{ 'name':'Koi','roll': '1905050' }" NOT { data: {"name": "koi", "roll": "19023"} }
    *
-   * Using this also ensures some pre-save checks, such as approved MUST not be able to set by student
+   * This is for frontend to be independent of format that strapi requires
+   * 
+   * Using this route ensures some pre-save checks, such as approved MUST not be able to set by student
    */
   async submit_for_approval(ctx) {
+    if (!ctx.is('multipart')) {
+      return ctx.badRequest(null, [{ messages: [{ id: "This route expects multipart/form-data" }] }]);
+    }
+
     const user = ctx.state.user;
 
     /* This is needed since only a signed in student should be able to send this + We need user.id later */
@@ -42,35 +50,44 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
 
-    const { data } = ctx.request.body;
+    const body = ctx.request.body;
 
-    if (!data) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
+    if (!body) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameters/Failed to parse" }] }]);
     }
 
-    if (data["roll"] != user.username) {
+    if (body["roll"] != user.username) {
       return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
+    /** NOTE: This directly modifies the ctx.request.body, which we want, since ctx is to be passed to this.create */
     // Ensure, sender did not sender with "approved: approved"
-    data["approved"] = "pending";
+    body["approved"] = "pending";
 
     // Give user id of related entry in Users collection, used for auth
-    data["user_relation"] = user.id;
+    body["user_relation"] = user.id;
 
-    try {
-      const student = await strapi.db.query("api::student.student").create({ data });
+    // strapi's default create route expects stringified JSON in 'data' field, since we are passing form-data
+    ctx.request.body = { data: JSON.stringify(body) };
 
-      if (!student) {
-        return ctx.internalServerError(null, [{ messages: [{ id: "Failed to update student's approval status" }] }]);
+    /** All fields that take media
+     * WHY: It is needed since from backend we are taking keys as, eg. "resume", but strapi's
+     * update route requires this to be "files.resume", so instead of depending on frontend to
+     * do this, I am separating this strapi-dependent logic from frontend, so this array will
+     * be used to rename all media fields adding "files." to the beginning
+     * 
+     * NOTE: This needs to be updated with every media field added to student schema
+     */
+    const media_fields = ["resume", "profile_pic"];
+    const files_to_upload = {};
+    for (const field in (ctx.request.files || {})) {
+      if (media_fields.includes(field)) {
+        files_to_upload[`files.${field}`] = ctx.request.files[field];
       }
-
-      ctx.body = student;
-
-    } catch (err) {
-      console.log(err.message);
-      ctx.badRequest(null, [{ messages: [{ id: "Failed to create student" }] }]);
     }
+    ctx.request.files = files_to_upload;
+
+    return await this.create(ctx);
   },
 
   /**
@@ -84,6 +101,10 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * Note3: Most fields cannot be updated after student clicks "Submit for approval"
    */
   async modify_multiple(ctx) {
+    if (!ctx.is('multipart')) {
+      return ctx.badRequest(null, [{ messages: [{ id: "This route expects multipart/form-data" }] }]);
+    }
+
     const user = ctx.state.user;
 
     if (!user) {
@@ -149,8 +170,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
      */
     const media_fields = ["resume", "profile_pic"];
     const files_to_upload = {};
-    for(const field in (ctx.request.files || {})) {
-      if(media_fields.includes(field)) {
+    for (const field in (ctx.request.files || {})) {
+      if (media_fields.includes(field)) {
         files_to_upload[`files.${field}`] = ctx.request.files[field];
       }
     }
@@ -165,7 +186,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // NOTE: Not allowing any user given query to pass through
     ctx.request.query = {};
 
-    console.log("Earlier, ctx.query", {q: ctx.query});
+    // console.log("Earlier, ctx.query", { q: ctx.query });
 
     // NOTE: Internally in strapi this 1 signifies replaceFile, it is like this in
     // node_modules/@strapi/plugin-upload/server/controllers/content-api.js
