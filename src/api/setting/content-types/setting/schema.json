@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "settings",
+  "info": {
+    "singularName": "setting",
+    "pluralName": "settings",
+    "displayName": "Setting"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "registrations_allowed": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "cpi_change_allowed": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    }
+  }
+}
