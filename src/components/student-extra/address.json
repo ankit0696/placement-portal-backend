@@ -2,7 +2,8 @@
   "collectionName": "components_composite_address_addresses",
   "info": {
     "displayName": "Address",
-    "icon": "home"
+    "icon": "home",
+    "description": ""
   },
   "options": {},
   "attributes": {
