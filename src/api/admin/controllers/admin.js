@@ -26,7 +26,6 @@ module.exports = {
       return ctx.internalServerError(null, [{ messages: [{ id: "Could not get strapi settings" }] }]);
     }
 
-    console.log(strapi_settings);
     const strapi_registrations_allowed = strapi_settings["allow_register"];
     const strapi_default_role = strapi_settings["default_role"];
 
@@ -89,9 +88,18 @@ module.exports = {
     /* This function known from node_modules/@strapi/plugin-users-permissions/server/controllers/settings.js -> updateAdvancedSettings */
     // Assuming it will not fail, if it does, it is 500 InternalServerError eitherways
     if(strapi_payload) {
+      const old_settings = await strapi
+        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
+        .get();
+
+      if (!old_settings) {
+        return ctx.internalServerError(null, [{ messages: [{ id: "Could not get strapi settings" }] }]);
+      }
+
+      /* NOTE: Using old_settings since, if they are not passed fields other than in strapi_payload will all be reset */
       await strapi
         .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .set({ value: strapi_payload });
+        .set({ value: {...old_settings, ...strapi_payload } });
     }
 
     // Query setting collection
