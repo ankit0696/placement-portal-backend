@@ -25,3 +25,8 @@
 * is approved company
 
 * Shouldn't company "has many jobs", instead of "job belongs to one company" relation. If company is removed then all its jobs should also.
+
+* About searching using javascript datetime, forums says this: (ref: https://forum.strapi.io/t/query-by-month-or-by-year-or-by-specific-day/3802/6):
+
+> Let’s your timezone from server differs with 12 hours from database, then if you send the request from server with 2020-01-01T00:00:00, then in db it will search 2019-12-31T12:00:00.
+

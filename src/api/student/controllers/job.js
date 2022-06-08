@@ -35,13 +35,19 @@ module.exports = {
                 min_XII_marks: {
                     $lte: XII_marks
                 },
-                last_date: {
-                    $gte: Date.now()
-                },
-                category: registered_for
+                // TODO: Find ways to query this, not working at all for now
+                // For now doing comparison with last date later in this function
+                // last_date: {
+                //     $gte: (new Date)
+                // },
+
+                // Filter based on if user registered for "Internship" or "FTE"
+                category: registered_for,
             },
             populate: ["company", "jaf"]
         });
+
+        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now(), is_in_future: "2022-06-08T18:49:23.001Z" < Date.now() });
 
         if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
@@ -53,6 +59,14 @@ module.exports = {
          * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
          */
         const exists = await Promise.all(eligible_jobs.map(async (job) => {
+            try {
+                // Check if current datetime is more than job's last datetime (ie. apply date passed)
+                if (Date.now() > Date.parse(job.last_date)) {
+                    return false;
+                }
+            } catch (err) {
+                console.debug(`[job: get_eligible_jobs]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
+            }
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 student: id,
                 job: job.id
@@ -155,13 +169,22 @@ module.exports = {
         // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now() });
         // console.log(job);
 
-        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && /*(Date.now() <= job.last_date) &&*/ registered_for == job.category) {
+        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && registered_for == job.category) {
+            try {
+                // Check if current datetime is more than job's last datetime (ie. apply date passed)
+                if (Date.now() > Date.parse(job.last_date)) {
+                    return ctx.badRequest(null[{ messages: [{ id: "Last date to apply has passed" }] }]);
+                }
+            } catch (err) {
+                console.debug(`[job: apply]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
+            }
+
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 student: id,
                 job: query.jobId
             });
 
-            if (!existing_application) {
+            if (existing_application) {
                 return ctx.badRequest(null, [{ messages: [{ id: "Already applied" }] }]);
             }
 
