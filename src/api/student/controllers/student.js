@@ -45,10 +45,6 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * Using this route ensures some pre-save checks, such as approved MUST not be able to set by student
    */
   async submit_for_approval(ctx) {
-    if (!ctx.is('multipart')) {
-      return ctx.badRequest(null, [{ messages: [{ id: "This route expects multipart/form-data" }] }]);
-    }
-
     const user = ctx.state.user;
 
     /* This is needed since only a signed in student should be able to send this + We need user.id later */
@@ -56,25 +52,25 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
 
-    const body = ctx.request.body;
+    const { data } = ctx.request.body;
 
-    if (!body) {
+    if (!data) {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameters/Failed to parse" }] }]);
     }
 
-    if (body["roll"] != user.username) {
+    if (data["roll"] != user.username) {
       return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
     /** NOTE: This directly modifies the ctx.request.body, which we want, since ctx is to be passed to this.create */
     // Ensure, sender did not sender with "approved: approved"
-    body["approved"] = "pending";
+    data["approved"] = "pending";
 
     // Give user id of related entry in Users collection, used for auth
-    body["user_relation"] = user.id;
+    data["user_relation"] = user.id;
 
     // strapi's default create route expects stringified JSON in 'data' field, since we are passing form-data
-    ctx.request.body = { data: JSON.stringify(body) };
+    ctx.request.body = { data: JSON.stringify(data) };
 
     /** All fields that take media
      * WHY: It is needed since from backend we are taking keys as, eg. "resume", but strapi's
