@@ -152,7 +152,10 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
         }
 
-        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && (Date.now() <= job.last_date) && registered_for == job.category) {
+        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now() });
+        // console.log(job);
+
+        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && /*(Date.now() <= job.last_date) &&*/ registered_for == job.category) {
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 student: id,
                 job: query.jobId
