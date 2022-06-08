@@ -10,7 +10,7 @@ module.exports = {
      },
     },
     {
-      method: 'POST',
+      method: 'PUT',
       path: '/admin/settings',
       handler: 'admin.change_settings',
       config: {
