@@ -70,7 +70,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     data["user_relation"] = user.id;
 
     // strapi's default create route expects stringified JSON in 'data' field, since we are passing form-data
-    ctx.request.body = { data: JSON.stringify(data) };
+    ctx.request.body = { data };
 
     /** All fields that take media
      * WHY: It is needed since from backend we are taking keys as, eg. "resume", but strapi's
