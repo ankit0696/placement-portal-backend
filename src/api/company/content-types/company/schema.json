@@ -13,10 +13,39 @@
   "pluginOptions": {},
   "attributes": {
     "company_name": {
-      "type": "string"
+      "type": "string",
+      "required": true,
+      "unique": true
     },
     "approved": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
+    },
+    "contact1": {
+      "displayName": "Contact Details",
+      "type": "component",
+      "repeatable": false,
+      "component": "company.contact-details"
+    },
+    "contact2": {
+      "type": "component",
+      "repeatable": false,
+      "component": "company.contact-details"
+    },
+    "contact3": {
+      "type": "component",
+      "repeatable": false,
+      "component": "company.contact-details"
+    },
+    "company_address": {
+      "type": "text"
+    },
+    "remarks": {
+      "type": "text"
+    },
+    "activated": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

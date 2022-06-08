@@ -21,3 +21,5 @@
 
 * eligible jobs
 * apply
+* company component
+* is approved company
