@@ -18,3 +18,6 @@
 
 * upload on modify route
 * applied jobs
+
+* eligible jobs
+* apply
