@@ -23,3 +23,5 @@
 * apply
 * company component
 * is approved company
+
+* Shouldn't company "has many jobs", instead of "job belongs to one company" relation. If company is removed then all its jobs should also.

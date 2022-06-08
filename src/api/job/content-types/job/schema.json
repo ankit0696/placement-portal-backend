@@ -80,6 +80,9 @@
         "FTE"
       ],
       "required": true
+    },
+    "start_date": {
+      "type": "datetime"
     }
   }
 }
