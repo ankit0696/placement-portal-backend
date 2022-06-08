@@ -52,6 +52,21 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
 
+    {
+      /** Check if administrator has blocked new registrations */
+      const settings = await strapi.query('api::setting.setting').findOne({
+        select: ["registrations_allowed"]
+      });
+
+      if (!settings) {
+        return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings for registrations allowed or not" }] }]);
+      }
+
+      if (settings["registrations_allowed"] == false) {
+        return ctx.badRequest(null, [{ messages: [{ id: "Registrations are not allowed. Please contact Administrator" }] }])
+      }
+    }
+
     const { data } = ctx.request.body;
 
     if (!data) {
@@ -133,11 +148,16 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     const { id, approved } = student_data;
 
+    /**
+     * NOTE TO FUTURE DEVELOPERS:
+     * 
+     * Currently we filter fields based on below arrays, ie. if ANY key is not in this array, it will simply be ignored, and hence not modifiable
+     */
     // Most mandatory components locked after approval of the profile (ie. only allowed to change before approval).
     // CPI can be updated when allowed by admin
     const fields_allowed_before_approval = [
       "name", "roll", "gender", "date_of_birth", "category", "rank", "registered_for", "program",
-      "department", "course", "address", "spi", "cpi", "X_marks", "XII_marks",
+      "department", "course", "address", "X_marks", "XII_marks",
       "ug_college", "ug_cpi",
     ];
 
@@ -146,7 +166,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
     ];
 
-    // fields that cannot be changed, for password, use forget password
+    // Fields related to SPI and CPI, only allowed to be changed if Admin globally allows change to these
+    const cpi_spi_fields = ["spi1", "spi2", "spi3", "spi4", "spi5", "spi6", "spi7", "spi8", "cpi"];
 
     // NOTE: ALL other fields (including invalid/unknown) are removed, and treated as immutable
     // for changing password, use forgot password
@@ -159,6 +180,26 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       }
       else if (fields_allowed_anytime.includes(field)) {
         fields_to_modify[field] = body[field];
+      }
+    }
+
+    /** Check if Administrator has allowed changing SPIs and CPIs */
+    const settings = await strapi.query('api::setting.setting').findOne({
+      select: ["cpi_change_allowed"]
+    });
+
+    if (!settings) {
+      console.log("[student: modify] Failed to get global settings for CPI change allowed or not");
+      console.log("[student: modify]     Not responding with failure, since it by default won't be modifiable");
+      // return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings for CPI change allowed or not" }] }]);
+    }
+
+    // If allowed, allow fields given in `cpi_spi_fields` array to be modified
+    if (settings["cpi_change_allowed"] == true) {
+      for(const field in body) {
+        if( cpi_spi_fields.includes(field) ) {
+          fields_to_modify[field] = body[field];
+        }
       }
     }
 

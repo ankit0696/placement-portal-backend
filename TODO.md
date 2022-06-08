@@ -12,16 +12,16 @@
 * Coordinator usernames, they may have 2 accounts, one as student and one as coordinator
 * When to allow changes to `profile_picture` and `current_sem` ?
 
-* Admin: Disallow registrations
-* Admin: Common collection for things like allow student registrations or allow CPI change by all students
+* [Done] Admin: Disallow registrations
+* [Done] Admin: Common collection for things like allow student registrations or allow CPI change by all students
 * Admin: Approving multiple students at a time
 
-* upload on modify route
-* applied jobs
+* [Done] upload on modify route
+* [Done] applied jobs
 
-* eligible jobs
-* apply
-* company component
+* [Done] eligible jobs
+* [Done] apply
+* [Done] company component
 * is approved company
 
 * Shouldn't company "has many jobs", instead of "job belongs to one company" relation. If company is removed then all its jobs should also.
