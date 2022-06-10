@@ -35,10 +35,10 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
   /** Authentication is needed for this 
    *
-   * Note: Send data in multipart (eg. form-data), as that allows for uploading files too
+   * Note: Send data in JSON (not form-data), hence file uploads are NOT allowed on this route, use /student/modify route for that
    * 
-   ** Requires request body is DIFFERENT than if passed to POST request to usual create entry through strapi REST api
-   * ie. ctx.request.body should be like: "{ 'name':'Koi','roll': '1905050' }" NOT { data: {"name": "koi", "roll": "19023"} }
+   ** Requires request body is same as if passed to POST request to usual create entry through strapi REST api
+   * ie. ctx.request.body should be like: { data: {"name": "koi", "roll": "19023"} }
    *
    * This is for frontend to be independent of format that strapi requires
    * 
@@ -77,32 +77,17 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
-    /** NOTE: This directly modifies the ctx.request.body, which we want, since ctx is to be passed to this.create */
+    /** NOTE: This directly modifies the ctx.request.body["data"], which we want, since ctx is to be passed to this.create */
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
 
     // Give user id of related entry in Users collection, used for auth
     data["user_relation"] = user.id;
 
-    // strapi's default create route expects stringified JSON in 'data' field, since we are passing form-data
     ctx.request.body = { data };
 
-    /** All fields that take media
-     * WHY: It is needed since from backend we are taking keys as, eg. "resume", but strapi's
-     * update route requires this to be "files.resume", so instead of depending on frontend to
-     * do this, I am separating this strapi-dependent logic from frontend, so this array will
-     * be used to rename all media fields adding "files." to the beginning
-     * 
-     * NOTE: This needs to be updated with every media field added to student schema
-     */
-    const media_fields = ["resume", "profile_pic"];
-    const files_to_upload = {};
-    for (const field in (ctx.request.files || {})) {
-      if (media_fields.includes(field)) {
-        files_to_upload[`files.${field}`] = ctx.request.files[field];
-      }
-    }
-    ctx.request.files = files_to_upload;
+    // File uploads are not allowed on this route, use /student/modify route for that
+    ctx.request.files = {};
 
     return await this.create(ctx);
   },
