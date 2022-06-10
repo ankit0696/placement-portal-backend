@@ -14,7 +14,8 @@
 
 * [Done] Admin: Disallow registrations
 * [Done] Admin: Common collection for things like allow student registrations or allow CPI change by all students
-* Admin: Approving multiple students at a time
+* [Reject] Admin: Approving multiple students at a time. How should it take these ?
+  Currently will be done one-by-one for each student on frontend
 
 * [Done] upload on modify route
 * [Done] applied jobs
@@ -30,3 +31,4 @@
 
 > Let’s your timezone from server differs with 12 hours from database, then if you send the request from server with 2020-01-01T00:00:00, then in db it will search 2019-12-31T12:00:00.
 
+* Abhi entries create krne ke liye do routes hai: `/student/submit-for-approval` aur `/company/register`, which take input and work exactly similar to default POST request to `/students` and to `/companies`, so instead of new routes, and taking care that permission is disabled for default routes, why not override the default routes themselves. Jaise ki `/api/students` pe POST request `student.submit_for_approval` kare

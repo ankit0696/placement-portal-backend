@@ -17,10 +17,6 @@
       "required": true,
       "unique": true
     },
-    "approved": {
-      "type": "boolean",
-      "default": false
-    },
     "contact1": {
       "displayName": "Contact Details",
       "type": "component",
@@ -43,9 +39,14 @@
     "remarks": {
       "type": "text"
     },
-    "activated": {
-      "type": "boolean",
-      "default": true
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "registered",
+        "approved",
+        "deactivated"
+      ],
+      "default": "registered"
     }
   }
 }
