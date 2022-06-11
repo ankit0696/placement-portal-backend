@@ -32,3 +32,8 @@
 > Let’s your timezone from server differs with 12 hours from database, then if you send the request from server with 2020-01-01T00:00:00, then in db it will search 2019-12-31T12:00:00.
 
 * Abhi entries create krne ke liye do routes hai: `/student/submit-for-approval` aur `/company/register`, which take input and work exactly similar to default POST request to `/students` and to `/companies`, so instead of new routes, and taking care that permission is disabled for default routes, why not override the default routes themselves. Jaise ki `/api/students` pe POST request `student.submit_for_approval` kare
+
+* Two ways to register coordinator:
+  1. [Current] Custom api on backend, accessing internal collections and classes to implement register and provide this functionality
+  2. Two calls from frontend... Problem is if 1st call happens and 2nd doesn't, then there will be a zombie student user, which will need to be removed before another try to create user with same username.
+     The calls -> /api/auth/local/register (default) + /api/admin/assign-role (custom implementation, modifying user-permissions collection)
