@@ -3,6 +3,9 @@
 module.exports = {
     /**
      * @description Searches the jobs db to look for eligible jobs for current student
+     * 
+     * @note There's a duplicate API, that one is for admin, to get eligible jobs for a given roll number
+     * 
      * @returns Array of job objects, each object containing detail for one job
      */
     async get_eligible_jobs(ctx) {
@@ -18,7 +21,7 @@ module.exports = {
             select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
         });
         if (!student_self) {
-            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
+	    return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
         }
 
         const { id, approved, X_marks, XII_marks, registered_for } = student_self;
@@ -47,7 +50,7 @@ module.exports = {
             populate: ["company", "jaf"]
         });
 
-        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now(), is_in_future: "2022-06-08T18:49:23.001Z" < Date.now() });
+        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now(), is_in_future: "2022-06-08T18:49:23.001Z" < Date.now(), eligible_jobs });
 
         if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
@@ -68,10 +71,14 @@ module.exports = {
                 console.debug(`[job: get_eligible_jobs]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
             }
             const existing_application = await strapi.db.query("api::application.application").findOne({
-                student: id,
-                job: job.id
+                where: {
+                    student: id,
+                    job: job.id,
+                },
+                // populate: true   (Not required, just checking if it exists)
             });
 
+            // console.log("For", {job: job.job_title, existing_application});
             if (!existing_application) {
                 // Not yet applied
                 return true;
