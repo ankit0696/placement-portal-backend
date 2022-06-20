@@ -6,8 +6,6 @@ module.exports = {
      * 
      * @note There's a duplicate API, that one is for admin, to get eligible jobs for a given roll number
      *
-     * TODO: Don't return 'inactive' jobs
-     * 
      * @returns Array of job objects, each object containing detail for one job
      */
     async get_eligible_jobs(ctx) {
@@ -40,6 +38,7 @@ module.exports = {
                 min_XII_marks: {
                     $lte: XII_marks
                 },
+                status: "active",
                 // TODO: Find ways to query this, not working at all for now
                 // For now doing comparison with last date later in this function
                 // last_date: {
