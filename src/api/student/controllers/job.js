@@ -5,6 +5,8 @@ module.exports = {
      * @description Searches the jobs db to look for eligible jobs for current student
      * 
      * @note There's a duplicate API, that one is for admin, to get eligible jobs for a given roll number
+     *
+     * TODO: Don't return 'inactive' jobs
      * 
      * @returns Array of job objects, each object containing detail for one job
      */
@@ -49,12 +51,29 @@ module.exports = {
             },
             populate: ["company", "jaf"]
         });
+        // console.log(eligible_jobs);
 
         // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now(), is_in_future: "2022-06-08T18:49:23.001Z" < Date.now(), eligible_jobs });
 
         if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
         }
+
+        // Check applications in which student has been selected
+        const selected_jobs = await strapi.db.query("api::application.application").findMany({
+            where: {
+                student: id,
+                status: "selected"
+            },
+            populate: ["job"]
+        });
+
+        const number_of_A1_applications = await strapi.db.query("api::application.application").count({
+            where: {
+                student: id,
+                // TODO: Add logic to not count applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS
+            }
+        });
 
         /**
          * `exists` is an array of bools, representing whether a job has been already applied for
@@ -65,11 +84,52 @@ module.exports = {
             try {
                 // Check if current datetime is more than job's last datetime (ie. apply date passed)
                 if (Date.now() > Date.parse(job.last_date)) {
+                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Date passed`);
                     return false;
                 }
             } catch (err) {
                 console.debug(`[job: get_eligible_jobs]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
             }
+
+            // Ensure that these conditions are met:
+            // 1. If job.classification is "X", then the 'below conditions' will be null and void, except required qualifications which are already checked, so return true
+            // 2. If selected in A1, out of placement, not eligible in future
+            // 3. If selected in B1, then 3 more A1 applications allowed, AFTER selected in B1
+            // 4. If student recieves 2 offers, not eligible for more applications
+            // TODO: Some of these conditions can be moved out of this loop
+            // Ensure condition 1 above
+            if (job.classification === "X") {
+                return true;
+            }
+
+            // Ensure condition 2 above
+            if(selected_jobs.find(selected_job => selected_job.job.classification === "A1") !== undefined) {
+                // Student has selected in A1
+                console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A1`);
+                return false;
+            }
+
+            // Ensure condition 3 above... checking for 3 A1 applications part to be done at apply function
+            if(selected_jobs.find(selected_job => selected_job.job.classification === "B1") != undefined) {
+                // If selected in B1 already, then other B1 jobs not eligible now
+                if(job.classification === "B1") {
+                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in B1`);
+                    return false;
+                }
+                
+                if(number_of_A1_applications >= 3) {
+                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Already applied for 3 A1 jobs`);
+                    return false;
+                }
+            }
+
+            // Ensures condition 4 above
+            if (selected_jobs.length >= 2) {
+                // Not eligible in any jobs
+                console.debug(`Roll: ${user.username}, Ineligible, Reason: Already selected for 2 jobs`);
+                return false;
+            }
+
             const existing_application = await strapi.db.query("api::application.application").findOne({
                 where: {
                     student: id,
@@ -80,10 +140,12 @@ module.exports = {
 
             // console.log("For", {job: job.job_title, existing_application});
             if (!existing_application) {
-                // Not yet applied
+                // Not yet applied, so eligible
                 return true;
+            } else {
+                console.debug(`Roll: ${user.username}, Ineligible, Reason: Already applied for job`);
+                return false;
             }
-            return false;
         }));
 
         eligible_jobs = eligible_jobs.filter((_, index) => exists[index]);
@@ -252,3 +314,5 @@ module.exports = {
         ctx.body = applied_jobs;
     },
 };
+
+// ex: shiftwidth=4 expandtab:
