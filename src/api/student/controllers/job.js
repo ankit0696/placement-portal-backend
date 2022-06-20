@@ -21,7 +21,7 @@ module.exports = {
             select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
         });
         if (!student_self) {
-	    return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
+            return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
         }
 
         const { id, approved, X_marks, XII_marks, registered_for } = student_self;
@@ -102,21 +102,21 @@ module.exports = {
             }
 
             // Ensure condition 2 above
-            if(selected_jobs.find(selected_job => selected_job.job.classification === "A1") !== undefined) {
+            if (selected_jobs.find(selected_job => selected_job.job.classification === "A1") !== undefined) {
                 // Student has selected in A1
                 console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A1`);
                 return false;
             }
 
             // Ensure condition 3 above... checking for 3 A1 applications part to be done at apply function
-            if(selected_jobs.find(selected_job => selected_job.job.classification === "B1") != undefined) {
+            if (selected_jobs.find(selected_job => selected_job.job.classification === "B1") != undefined) {
                 // If selected in B1 already, then other B1 jobs not eligible now
-                if(job.classification === "B1") {
+                if (job.classification === "B1") {
                     console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in B1`);
                     return false;
                 }
-                
-                if(number_of_A1_applications >= 3) {
+
+                if (number_of_A1_applications >= 3) {
                     console.debug(`Roll: ${user.username}, Ineligible, Reason: Already applied for 3 A1 jobs`);
                     return false;
                 }
@@ -180,7 +180,8 @@ module.exports = {
 
         const all_jobs = await strapi.db.query("api::job.job").findMany({
             where: {
-                category: registered_for
+                category: registered_for,
+                status: "active"
             },
             populate: ["company", "jaf"]
         });
@@ -225,13 +226,18 @@ module.exports = {
 
         const job = await strapi.db.query("api::job.job").findOne({
             where: {
-                id: query.jobId
+                id: query.jobId,
             },
             populate: true
         });
 
         if (!job) {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
+        }
+
+        // Check for job status
+        if (job.status !== "active") {
+            return ctx.badRequest(null, [{ messages: [{ id: "Job is not active, or may not be open yet" }] }]);
         }
 
         // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now() });
