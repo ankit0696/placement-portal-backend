@@ -186,6 +186,11 @@
       "allowedTypes": [
         "images"
       ]
+    },
+    "remarks": {
+      "type": "text",
+      "required": true,
+      "private": true
     }
   }
 }
