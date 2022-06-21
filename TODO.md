@@ -41,6 +41,6 @@
 * Job collection me 2 attributes hai: `status` and `job_status`, which to use ?
 
 * [Done] Remarks column private in student collection
-* Remove logic to disallow internal registrations
+* [Done] Remove logic to disallow internal registrations
 
 * Good to have: Filter jobs by start_date also

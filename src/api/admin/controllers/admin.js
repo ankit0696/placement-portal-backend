@@ -39,8 +39,8 @@ module.exports = {
     const {registrations_allowed, cpi_change_allowed} = settings;
 
     ctx.body = {
-      strapi_registrations_allowed,
-      strapi_default_role,
+      strapi_registrations_allowed,     /*This is an internal property, don't use it*/
+      strapi_default_role,              /*This is an internal property, don't use it*/
       registrations_allowed,
       cpi_change_allowed
     };
@@ -62,10 +62,11 @@ module.exports = {
    *
    * NOTE2: Authentication with 'admin' role is required
    *
+   * NOTE3: Removed logic to change internal 'allow_register' property in strapi, since if registrations_allowed is set, then we just want students to not register, all other registrations should work, and they require the user registrations (/api/auth/local/register to work)
+   *
    * For that, you should use get_settings(), that way caller can be sure that it is modified
    */
   change_settings: async (ctx) => {
-    const strapi_payload = {};
     const settings_to_change = {};
 
     const body = ctx.request.body;
@@ -75,31 +76,12 @@ module.exports = {
 
     const {registrations_allowed, cpi_change_allowed} = body;
 
-    if(typeof(body["registrations_allowed"]) === "boolean") {
-      console.log("registrations_allowed is given");
-      strapi_payload["allow_register"] = body["registrations_allowed"];
-      settings_to_change["registrations_allowed"] = body["registrations_allowed"];
+    if(typeof(registrations_allowed) === "boolean") {
+      settings_to_change["registrations_allowed"] = registrations_allowed;
     }
 
-    if(typeof(body["cpi_change_allowed"]) === "boolean") {
-      settings_to_change["cpi_change_allowed"] = body["cpi_change_allowed"];
-    }
-
-    /* This function known from node_modules/@strapi/plugin-users-permissions/server/controllers/settings.js -> updateAdvancedSettings */
-    // Assuming it will not fail, if it does, it is 500 InternalServerError eitherways
-    if(strapi_payload) {
-      const old_settings = await strapi
-        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .get();
-
-      if (!old_settings) {
-        return ctx.internalServerError(null, [{ messages: [{ id: "Could not get strapi settings" }] }]);
-      }
-
-      /* NOTE: Using old_settings since, if they are not passed fields other than in strapi_payload will all be reset */
-      await strapi
-        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .set({ value: {...old_settings, ...strapi_payload } });
+    if(typeof(cpi_change_allowed) === "boolean") {
+      settings_to_change["cpi_change_allowed"] = cpi_change_allowed;
     }
 
     // Query setting collection
