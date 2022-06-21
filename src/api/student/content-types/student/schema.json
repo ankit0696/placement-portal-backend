@@ -13,10 +13,12 @@
   "pluginOptions": {},
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "roll": {
-      "type": "uid"
+      "type": "uid",
+      "required": true
     },
     "gender": {
       "type": "enumeration",
@@ -24,7 +26,8 @@
         "male",
         "female",
         "other"
-      ]
+      ],
+      "required": true
     },
     "category": {
       "type": "enumeration",
@@ -39,11 +42,13 @@
     },
     "institute_email_id": {
       "type": "email",
-      "unique": true
+      "unique": true,
+      "required": true
     },
     "personal_email_id": {
       "type": "email",
-      "unique": true
+      "unique": true,
+      "required": true
     },
     "resume": {
       "type": "media",
@@ -69,25 +74,32 @@
         "M.Tech",
         "M.Sc",
         "BS"
-      ]
+      ],
+      "required": true
     },
     "date_of_birth": {
-      "type": "date"
+      "type": "date",
+      "required": true
     },
     "X_marks": {
-      "type": "decimal"
+      "type": "decimal",
+      "required": true
     },
     "XII_marks": {
-      "type": "decimal"
+      "type": "decimal",
+      "required": true
     },
     "rank": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "categoryRank": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "admission_year": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "approved": {
       "type": "enumeration",
@@ -96,7 +108,9 @@
         "pending",
         "approved",
         "rejected"
-      ]
+      ],
+      "default": "pending",
+      "required": true
     },
     "spi_1": {
       "type": "string"
@@ -123,7 +137,8 @@
       "type": "string"
     },
     "cpi": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "bachelor_marks": {
       "type": "string"
@@ -136,14 +151,16 @@
       "enum": [
         "mathematics",
         "computer science "
-      ]
+      ],
+      "required": true
     },
     "course": {
       "type": "enumeration",
       "enum": [
         "Mathematics & Computing",
         "Mechatronics"
-      ]
+      ],
+      "required": true
     },
     "address": {
       "type": "text",

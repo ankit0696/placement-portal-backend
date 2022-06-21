@@ -19,7 +19,9 @@
         "shortlisted",
         "selected",
         "rejected"
-      ]
+      ],
+      "required": true,
+      "default": "applied"
     },
     "student": {
       "type": "relation",

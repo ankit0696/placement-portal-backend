@@ -60,7 +60,7 @@
         "B1",
         "X"
       ],
-      "required": false
+      "required": true
     },
     "min_X_marks": {
       "type": "decimal",

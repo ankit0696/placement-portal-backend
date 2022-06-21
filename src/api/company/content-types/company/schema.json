@@ -46,7 +46,8 @@
         "approved",
         "deactivated"
       ],
-      "default": "registered"
+      "default": "registered",
+      "required": true
     }
   }
 }
