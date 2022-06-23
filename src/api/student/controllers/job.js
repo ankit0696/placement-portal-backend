@@ -18,16 +18,20 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
+            select: ["id", "approved", "X_marks", "XII_marks", "cpi", "program", "department", "registered_for"]
         });
         if (!student_self) {
             return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
         }
 
-        const { id, approved, X_marks, XII_marks, registered_for } = student_self;
+        const { id, approved, X_marks, XII_marks, cpi, program, department, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        if(cpi === undefined) {
+            return ctx.badRequest(null, [{ messages: [{ id: "CPI not updated yet" }] }]);
         }
 
         let eligible_jobs = await strapi.db.query("api::job.job").findMany({
@@ -38,6 +42,12 @@ module.exports = {
                 min_XII_marks: {
                     $lte: XII_marks
                 },
+                min_cpi: {
+                    $lte: cpi
+                },
+                // NOTE: eligible_departments is handled after this query
+                // NOTE2: eligible_program is mandatory field in Job collection, and must contain name of only 1 program, eg. B.Tech
+                eligible_program: program,
                 status: "active",
                 // TODO: Find ways to query this, not working at all for now
                 // For now doing comparison with last date later in this function
@@ -57,6 +67,18 @@ module.exports = {
         if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
         }
+
+        // Assumption: job.eligible_departments is a string of comma separated CASE-INSENSITIVE department names, eg. "mathematics,computer science"
+        eligible_jobs = eligible_jobs.filter(job => {
+            // Filter based on job.eligible_departments if it's not empty
+            if (job.eligible_departments) {
+                // Case insensitive
+                let lowercase_dep = department.toLowerCase();
+                return job.eligible_departments.split(",").map(dep => dep.toLowerCase()).includes(lowercase_dep);
+            } else {
+                return true;
+            }
+        });
 
         // Check applications in which student has been selected
         const selected_jobs = await strapi.db.query("api::application.application").findMany({

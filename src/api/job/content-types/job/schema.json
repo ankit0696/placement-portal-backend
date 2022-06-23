@@ -84,6 +84,18 @@
     },
     "start_date": {
       "type": "datetime"
+    },
+    "eligible_program": {
+      "type": "string",
+      "required": false
+    },
+    "eligible_departments": {
+      "type": "text"
+    },
+    "min_cpi": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
     }
   }
 }
