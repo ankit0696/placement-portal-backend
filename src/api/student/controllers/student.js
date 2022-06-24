@@ -14,8 +14,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   async findMe(ctx) {
     const user = ctx.state.user;
 
-    // Can use this if using this.findOne, instead of quering by self, Since the context will be passed to this.findOne, passing populate: * to populate all fields
-    // But not doing that since even for this.findOne we require student.id for which atleast one query is eitherway required
+    // Can use this if using this.findOne, instead of querying by self, Since the context will be passed to this.findOne, passing populate: * to populate all fields
+    // But not doing that since even for this.findOne we require student.id for which at least one query is eitherway required
     // console.log({ query: ctx.request.query });
     // ctx.request.query = { "populate": "*", filter: "id=1" ...ctx.request.query };
 
@@ -97,7 +97,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * 
    * NOTE1: request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
    * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050","resume": File }, ie. NOT like { "data": {"name": "koi"} }
-   * This was made to accomodate both types of input, as body and form-data
+   * This was made to accommodate both types of input, as body and form-data
    *
    * Note2: Requires authentication
    * Note3: Most fields cannot be updated after student clicks "Submit for approval"
@@ -146,7 +146,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       "ug_college", "ug_cpi",
     ];
 
-    // should include atleast ALL optional fields
+    // should include at least ALL optional fields
     const fields_allowed_anytime = [
       "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
     ];

@@ -116,7 +116,7 @@ module.exports = {
             // 1. If job.classification is "X", then the 'below conditions' will be null and void, except required qualifications which are already checked, so return true
             // 2. If selected in A1, out of placement, not eligible in future
             // 3. If selected in B1, then 3 more A1 applications allowed, AFTER selected in B1
-            // 4. If student recieves 2 offers, not eligible for more applications
+            // 4. If student receives 2 offers, not eligible for more applications
             // TODO: Some of these conditions can be moved out of this loop
             // Ensure condition 1 above
             if (job.classification === "X") {
@@ -215,7 +215,7 @@ module.exports = {
      * @description Apply to a job passing the job id
      * @example http://localhost:1337/api/student/apply?jobId=2
      * @note requires authentication
-     * @returns 200 status on success, else error codes possibly with a body {messsages: [{id:'msg'}]}
+     * @returns 200 status on success, else error codes possibly with a body {messages: [{id:'msg'}]}
      */
     async apply_to_job(ctx) {
         const user = ctx.state.user;
