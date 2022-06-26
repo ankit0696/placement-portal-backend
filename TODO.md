@@ -38,9 +38,10 @@
   2. Two calls from frontend... Problem is if 1st call happens and 2nd doesn't, then there will be a zombie student user, which will need to be removed before another try to create user with same username.
      The calls -> /api/auth/local/register (default) + /api/admin/assign-role (custom implementation, modifying user-permissions collection)
 
-* Job collection me 2 attributes hai: `status` and `job_status`, which to use ?
+* [Done] Job collection me 2 attributes hai: `status` and `job_status`, which to use ? Use job_status
 
 * [Done] Remarks column private in student collection
 * [Done] Remove logic to disallow internal registrations
 
-* Good to have: Filter jobs by start_date also
+* [Done] Good to have: Filter jobs by start_date also
+* Add logic to not count A1 applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS

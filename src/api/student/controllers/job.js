@@ -4,7 +4,30 @@ module.exports = {
     /**
      * @description Searches the jobs db to look for eligible jobs for current student
      * 
-     * @note There's a duplicate API, that one is for admin, to get eligible jobs for a given roll number
+     * @note There's also a similar API for admin, to get eligible jobs for a given roll number
+     *
+     * @checks
+     * - student is logged in
+     * - student record with roll number exists
+     * - student is approved by admin
+     *
+     * @job_checks
+     * To be eligible for a job:
+     * - job minimum marks are less than or equal to student's marks, X, XII, CPI
+     * - job is eligible for student's program, eg B.Tech
+     * - job is eligible for student's department
+     * - job category matches student's registerd_for category, eg. Internship/FTE
+     * - job is approved by admin
+     * - job status is open
+     * - job start datetime is less than current datetime
+     * - job last datetime is greater than current datetime
+     * - job is not already applied by student
+     *
+     * More conditions based on past applications:
+     * - 1. If job.classification is "X", then the 'below' 3 conditions will be null and void
+     * - 2. If selected in A1 => out of placement, not eligible
+     * - 3. If selected in A2, then 3 more A1 applications allowed, AFTER selected in A2
+     * - 4. If student receives 2 offers, not eligible for more applications
      *
      * @returns Array of job objects, each object containing detail for one job
      */
@@ -45,41 +68,61 @@ module.exports = {
                 min_cpi: {
                     $lte: cpi
                 },
-                // NOTE: eligible_departments is handled after this query
-                // NOTE2: eligible_program is mandatory field in Job collection, and must contain name of only 1 program, eg. B.Tech
+                // eligible_program is a mandatory field in Job collection,
+                // and must contain name of only 1 program, eg. B.Tech
                 eligible_program: program,
 
                 // Only jobs that are approved will be shown to student
                 approval_status: "approved",
-                // TODO: Find ways to query this, not working at all for now
-                // For now doing comparison with last date later in this function
-                // last_date: {
-                //     $gte: (new Date)
-                // },
+
+                // Only jobs open to applications will be shown to student
+                job_status: "open",
 
                 // Filter based on if user registered for "Internship" or "FTE"
                 category: registered_for,
             },
             populate: ["company", "jaf"]
         });
-        // console.log(eligible_jobs);
-
-        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now(), is_in_future: "2022-06-08T18:49:23.001Z" < Date.now(), eligible_jobs });
 
         if (!eligible_jobs || !Array.isArray(eligible_jobs)) {
             return ctx.internalServerError(null, [{ messages: [{ id: "Could not get eligible jobs" }] }]);
         }
 
-        // Assumption: job.eligible_departments is a string of comma separated CASE-INSENSITIVE department names, eg. "mathematics,computer science"
+        // Assumption: job.eligible_departments is a string of comma-separated
+        // CASE-INSENSITIVE department names, eg. "mathematics,computer science"
         eligible_jobs = eligible_jobs.filter(job => {
             // Filter based on job.eligible_departments if it's not empty
             if (job.eligible_departments) {
                 // Case insensitive
                 let lowercase_dep = department.toLowerCase();
-                return job.eligible_departments.split(",").map(dep => dep.toLowerCase()).includes(lowercase_dep);
-            } else {
-                return true;
+                let lowercase_eligible_dep = job.eligible_departments.toLowerCase().split(",");
+
+                // If NONE of the eligible departments match the student's department, then return false
+                if(!lowercase_eligible_dep.includes(lowercase_dep)) {
+                    return false;
+                }
             }
+
+            // Filter based on job.start_date and job.last_date
+            try {
+                // If job.start_date is not empty, then check if it's in the future, if so return false
+                if(job.start_date) {
+                    let start_date = new Date(job.start_date);
+                    if (start_date > new Date()) {
+                        return false;
+                    }
+                }
+
+                let last_date = new Date(job.last_date);
+
+                if (last_date < Date.now()) {
+                    return false;
+                }
+            } catch (e) {
+                console.log(`WARNING: Job start_date or last_date is not a valid date: ${job.start_date} or ${job.last_date}`);
+            }
+
+            return true;
         });
 
         // Check applications in which student has been selected
@@ -94,7 +137,6 @@ module.exports = {
         const number_of_A1_applications = await strapi.db.query("api::application.application").count({
             where: {
                 student: id,
-                // TODO: Add logic to not count applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS
             }
         });
 
@@ -104,39 +146,25 @@ module.exports = {
          * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
          */
         const exists = await Promise.all(eligible_jobs.map(async (job) => {
-            try {
-                // Check if current datetime is more than job's last datetime (ie. apply date passed)
-                if (Date.now() > Date.parse(job.last_date)) {
-                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Date passed`);
-                    return false;
-                }
-            } catch (err) {
-                console.debug(`[job: get_eligible_jobs]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
-            }
-
-            // Ensure that these conditions are met:
-            // 1. If job.classification is "X", then the 'below conditions' will be null and void, except required qualifications which are already checked, so return true
-            // 2. If selected in A1, out of placement, not eligible in future
-            // 3. If selected in B1, then 3 more A1 applications allowed, AFTER selected in B1
-            // 4. If student receives 2 offers, not eligible for more applications
             // TODO: Some of these conditions can be moved out of this loop
-            // Ensure condition 1 above
+            // Ensure condition 1 in "More conditions"
             if (job.classification === "X") {
                 return true;
             }
 
-            // Ensure condition 2 above
+            // Ensure condition 2 in "More conditions"
             if (selected_jobs.find(selected_job => selected_job.job.classification === "A1") !== undefined) {
                 // Student has selected in A1
                 console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A1`);
                 return false;
             }
 
-            // Ensure condition 3 above... checking for 3 A1 applications part to be done at apply function
-            if (selected_jobs.find(selected_job => selected_job.job.classification === "B1") != undefined) {
-                // If selected in B1 already, then other B1 jobs not eligible now
-                if (job.classification === "B1") {
-                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in B1`);
+            // Ensure condition 3 in "More conditions".
+            // Checking for 3 A1 applications part to be done at apply function
+            if (selected_jobs.find(selected_job => selected_job.job.classification === "A2") != undefined) {
+                // If selected in A2 already, then other A2 jobs not eligible now
+                if (job.classification === "A2") {
+                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A2`);
                     return false;
                 }
 
@@ -146,7 +174,7 @@ module.exports = {
                 }
             }
 
-            // Ensures condition 4 above
+            // Ensures condition 4 in "More conditions"
             if (selected_jobs.length >= 2) {
                 // Not eligible in any jobs
                 console.debug(`Roll: ${user.username}, Ineligible, Reason: Already selected for 2 jobs`);
@@ -269,7 +297,7 @@ module.exports = {
 
         if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && registered_for == job.category) {
             try {
-                // Check if current datetime is more than job's last datetime (ie. apply date passed)
+                // Check if current datetime is more than job's last datetime
                 if (Date.now() > Date.parse(job.last_date)) {
                     return ctx.badRequest(null[{ messages: [{ id: "Last date to apply has passed" }] }]);
                 }
