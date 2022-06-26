@@ -189,7 +189,7 @@
     },
     "remarks": {
       "type": "text",
-      "required": true,
+      "required": false,
       "private": true
     }
   }
