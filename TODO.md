@@ -44,4 +44,6 @@
 * [Done] Remove logic to disallow internal registrations
 
 * [Done] Good to have: Filter jobs by start_date also
+* [Done] Job classifications to be: A1, A2, X
 * Add logic to not count A1 applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS
+* Add api for getting student's applications

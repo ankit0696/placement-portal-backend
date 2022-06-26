@@ -126,19 +126,38 @@ module.exports = {
         });
 
         // Check applications in which student has been selected
-        const selected_jobs = await strapi.db.query("api::application.application").findMany({
+        const selected_applications = await strapi.db.query("api::application.application").findMany({
             where: {
                 student: id,
                 status: "selected"
             },
             populate: ["job"]
         });
+        console.log({selected_applications});
 
-        const number_of_A1_applications = await strapi.db.query("api::application.application").count({
+        // Date at which student was first selected in A2 (if any)
+        const first_A2_application = selected_applications.find(appl => appl.job.category === "A2") || null;
+        const date_A2_selection = first_A2_application ? Date.parse(first_A2_application.created_at) : null;
+
+        // Number of applications to A1 jobs created by student, AFTER being selected in an A2 job
+        const num_new_A1_application = (await strapi.db.query("api::application.application").findMany({
             where: {
                 student: id,
+                job: { classification: "A1" }
+            },
+        })).filter(application => {
+            if( date_A2_selection ) {
+                return Date.parse(application.createdAt) > date_A2_selection;
             }
-        });
+            return true;
+        }).length;
+
+        console.log({date_A2_selection, num_new_A1_application});
+
+        const already_selected_A1 = (
+            selected_applications
+                .find(appl => appl.job.classification === "A1") !== undefined
+        );
 
         /**
          * `exists` is an array of bools, representing whether a job has been already applied for
@@ -146,28 +165,26 @@ module.exports = {
          * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
          */
         const exists = await Promise.all(eligible_jobs.map(async (job) => {
-            // TODO: Some of these conditions can be moved out of this loop
             // Ensure condition 1 in "More conditions"
             if (job.classification === "X") {
                 return true;
             }
 
             // Ensure condition 2 in "More conditions"
-            if (selected_jobs.find(selected_job => selected_job.job.classification === "A1") !== undefined) {
-                // Student has selected in A1
+            if (already_selected_A1) {
                 console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A1`);
                 return false;
             }
 
             // Ensure condition 3 in "More conditions".
-            // Checking for 3 A1 applications part to be done at apply function
-            if (selected_jobs.find(selected_job => selected_job.job.classification === "A2") != undefined) {
+            if (first_A2_application != null) {
                 // If selected in A2 already, then other A2 jobs not eligible now
                 if (job.classification === "A2") {
                     console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A2`);
                     return false;
                 }
 
+                // Checking for 3 A1 applications condition
                 if (number_of_A1_applications >= 3) {
                     console.debug(`Roll: ${user.username}, Ineligible, Reason: Already applied for 3 A1 jobs`);
                     return false;
@@ -175,7 +192,7 @@ module.exports = {
             }
 
             // Ensures condition 4 in "More conditions"
-            if (selected_jobs.length >= 2) {
+            if (selected_applications.length >= 2) {
                 // Not eligible in any jobs
                 console.debug(`Roll: ${user.username}, Ineligible, Reason: Already selected for 2 jobs`);
                 return false;
@@ -259,7 +276,9 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "Required jobId in query" }] }]);
         }
 
-        /* NOTE: The "id" here maybe different than user.id, since that refers to id in Users collection, and this is in the Students collection */
+        // NOTE: The "id" here maybe different than user.id,
+        // since that refers to id in Users collection, 
+        // and this is in the Students collection
         const student_self = await strapi.db.query("api::student.student").findOne({
             where: {
                 roll: user.username,
