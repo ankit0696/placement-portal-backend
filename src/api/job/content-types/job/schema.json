@@ -45,8 +45,8 @@
       "enum": [
         "open",
         "ongoing",
-        "results declared",
-        "abdanoned"
+        "results_declared",
+        "abandoned"
       ]
     },
     "last_date": {

@@ -161,7 +161,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     for (const field in body) {
       // These fields will only be added to `fields_to_modify` if account is not already approved/rejected
       if (fields_allowed_before_approval.includes(field) == true) {
-        continue; // skip modifying fiels that are not allowed after "Submit for approval"
+        continue; // skip modifying fields that are not allowed after "Submit for approval"
       }
       else if (fields_allowed_anytime.includes(field)) {
         fields_to_modify[field] = body[field];
