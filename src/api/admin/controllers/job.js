@@ -53,7 +53,9 @@ module.exports = {
                 // NOTE: eligible_departments is handled after this query
                 // NOTE2: eligible_program is mandatory field in Job collection, and must contain name of only 1 program, eg. B.Tech
                 eligible_program: program,
-                status: "active",
+
+                // Only jobs that are approved will be shown to student
+                approval_status: "approved",
                 // TODO: Find ways to query this, not working at all for now
                 // For now doing comparison with last date later in this function
                 // last_date: {
