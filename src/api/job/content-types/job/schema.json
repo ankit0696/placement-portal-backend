@@ -31,14 +31,14 @@
         "files"
       ]
     },
-    "status": {
+    "approval_status": {
       "type": "enumeration",
       "enum": [
-        "active",
-        "inactive"
+        "approved",
+        "pending"
       ],
       "required": true,
-      "default": "inactive"
+      "default": "pending"
     },
     "job_status": {
       "type": "enumeration",
