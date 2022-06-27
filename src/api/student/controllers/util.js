@@ -4,7 +4,7 @@ module.exports = {
     /**
      * Helper function to check if a student is eligible for a job
      * 
-     * @param {{department, program}} student Student date, including `department`, `program` 
+     * @param {Student} student Student data
      * @param {Job} job Job object which has to be checked 
      * @param {[Application]} selected_applications
      * - Array of applications, for which "the current student" has already been selected

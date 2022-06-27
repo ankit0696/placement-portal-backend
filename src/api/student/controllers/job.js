@@ -27,13 +27,12 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["id", "approved", "X_marks", "XII_marks", "cpi", "program", "department", "registered_for"]
         });
         if (!student_self) {
             return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
         }
 
-        const { id, approved, X_marks, XII_marks, cpi, program, department, registered_for } = student_self;
+        const { id, approved, X_marks, XII_marks, cpi, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -74,8 +73,8 @@ module.exports = {
          * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
          */
         const is_eligible = await Promise.all(eligible_jobs.map(
-            async (job) => helper_is_job_eligible(student_self, job, selected_applications))
-        );
+            async (job) => (await helper_is_job_eligible(student_self, job, selected_applications))
+        ));
 
         eligible_jobs = eligible_jobs.filter((_, index) => is_eligible[index]);
 
@@ -111,7 +110,7 @@ module.exports = {
         const all_jobs = await strapi.db.query("api::job.job").findMany({
             where: {
                 category: registered_for,
-                status: "active"
+                approval_status: "approved",
             },
             populate: ["company", "jaf"]
         });
@@ -144,13 +143,10 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["id", "approved", "X_marks", "XII_marks", "registered_for"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
-
-        const { id, approved, X_marks, XII_marks, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
@@ -167,50 +163,26 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
         }
 
-        // Check for job status
-        if (job.status !== "active") {
-            return ctx.badRequest(null, [{ messages: [{ id: "Job is not active, or may not be open yet" }] }]);
-        }
-
-        // console.log({ id, approved, X_marks, XII_marks, registered_for, date: Date.now() });
-        // console.log(job);
-
-        if (X_marks >= job.min_X_marks && XII_marks >= job.min_XII_marks && registered_for == job.category) {
-            try {
-                // Check if current datetime is more than job's last datetime
-                if (Date.now() > Date.parse(job.last_date)) {
-                    return ctx.badRequest(null[{ messages: [{ id: "Last date to apply has passed" }] }]);
-                }
-            } catch (err) {
-                console.debug(`[job: apply]: Job: ${job.job_title} may have invalid last date: ${job.last_date}`, { err });
-            }
-
-            const existing_application = await strapi.db.query("api::application.application").findOne({
-                student: id,
-                job: query.jobId
-            });
-
-            if (existing_application) {
-                return ctx.badRequest(null, [{ messages: [{ id: "Already applied" }] }]);
-            }
-
-            const application = await strapi.db.query("api::application.application").create({
-                data: {
-                    status: "applied",
-                    student: id,
-                    job: query.jobId
-                },
-                populate: ["job"]
-            });
-
-            if (!application) {
-                return ctx.internalServerError(null, [{ messages: [{ id: "Failed to create application" }] }]);
-            }
-
-            ctx.body = application;
-        } else {
+        const is_eligible = await helper_is_job_eligible(student_self, job, selected_applications);
+        if (!is_eligible) {
             return ctx.badRequest(null, [{ messages: [{ id: "Not eligible" }] }]);
         }
+
+        /* Eligible, as above conditions are all satisfied */
+        const application = await strapi.db.query("api::application.application").create({
+            data: {
+                status: "applied",
+                student: id,
+                job: query.jobId
+            },
+            populate: ["job"]
+        });
+
+        if (!application) {
+            return ctx.internalServerError(null, [{ messages: [{ id: "Failed to create application" }] }]);
+        }
+
+        ctx.body = application;
     },
 
     /**
@@ -225,7 +197,7 @@ module.exports = {
         if (!user || !user.username) {
             return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
         }
-        const applied_jobs = helper_get_applications(user.username);
+        const applied_jobs = await helper_get_applications(user.username);
 
         ctx.body = applied_jobs;
     },
