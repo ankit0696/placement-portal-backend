@@ -29,6 +29,8 @@ module.exports = {
      * - job start datetime is less than current datetime
      * - job last datetime is greater than current datetime
      * - job is not already applied by student
+     * - If job.only_for_ews, then only EWS students are eligible
+     * - If job.only_for_pwd, then only PWD students are eligible
      *
      * More conditions based on past applications:
      * - 1. If job.classification is "X", then the 'below' 3 conditions will be null and void
@@ -75,6 +77,14 @@ module.exports = {
 
             if (job.category != registered_for) {
                 return false /* Job's category is not the one student registered for */;
+            }
+
+            if(job.only_for_ews) {
+                if(student.category != "ews") return false /* Job only for EWS */;
+            }
+
+            if(job.only_for_pwd) {
+                if(student.pwd == false) return false /* Job only for PWD */;
             }
         }
 

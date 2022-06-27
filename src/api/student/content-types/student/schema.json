@@ -36,9 +36,9 @@
         "obc",
         "sc",
         "st",
-        "ews",
-        "pwd"
-      ]
+        "ews"
+      ],
+      "required": true
     },
     "institute_email_id": {
       "type": "email",
@@ -191,6 +191,10 @@
       "type": "text",
       "required": false,
       "private": true
+    },
+    "pwd": {
+      "type": "boolean",
+      "required": true
     }
   }
 }

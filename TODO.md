@@ -1,11 +1,11 @@
-* `roll` should not be unique at beginning, since someone may send a fake request blocking actual student from registering. But after approval, it should be unique, that is, no other student registers with that roll
+* [Reject] `roll` should not be unique at beginning, since someone may send a fake request blocking actual student from registering. But after approval, it should be unique, that is, no other student registers with that roll
 * [Reject] How to handle "job approval requests" and "student approval requests" ? Currently Request collection me ek student ka relation hai
 * Password reset:
   Old: Either give current and new password. Or send request to admin... I think then admin will set a temporary password, then user can change by giving it and new passwords
   Proposed: Since 'User' password will have to be changed too, requires email sent.
   Just 'Making it work'(TM): Delete previous user object, create new 'User' object with new password, and replace with it in Student.user_relation
 * "approved: created" maybe redundant, since just after register, user HAS to call submit-for-approval which sets approved: "pending"
-* `role` needs to be asked from frontend side. Since, default role when using http://localhost:1337/api/auth/register-role or /api/local/auth/register is "Authenticated", so superadmin will have to change this role once approved
+* [Done] `role` needs to be asked from frontend side. Since, default role when using http://localhost:1337/api/auth/register-role or /api/local/auth/register is "Authenticated", so superadmin will have to change this role once approved
 
 * Minimum Password length >=6
 * [Done] Don't allow any change or get_eligible_jobs after 'Submit for approval'
@@ -23,7 +23,7 @@
 * [Done] eligible jobs
 * [Done] apply
 * [Done] company component
-* is approved company
+* [Done] is approved company
 
 * Shouldn't company "has many jobs", instead of "job belongs to one company" relation. If company is removed then all its jobs should also.
 
@@ -47,7 +47,7 @@
 * [Done] Job classifications to be: A1, A2, X
 * [Done] Add logic to not count A1 applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS
 * [Done] Add api for getting student's applications for admin
-* Allow job to have multiple eligible_programs
+* [Done] Allow job to have multiple eligible_programs
 * [Done] Separate is eligible logic into a different function
-* EWS, PWD
-* Use different function for checking eligibility in apply_job
+* [Done] EWS, PWD
+* [Done] Use different function for checking eligibility in apply_job

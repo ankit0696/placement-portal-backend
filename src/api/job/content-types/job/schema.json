@@ -86,7 +86,7 @@
     "start_date": {
       "type": "datetime"
     },
-    "eligible_program": {
+    "eligible_programs": {
       "type": "string",
       "required": false
     },
@@ -97,6 +97,16 @@
       "type": "decimal",
       "required": true,
       "min": 0
+    },
+    "only_for_pwd": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "only_for_ews": {
+      "type": "boolean",
+      "default": false,
+      "required": true
     }
   }
 }
