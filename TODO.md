@@ -48,3 +48,6 @@
 * [Done] Add logic to not count A1 applications that are in "rejected" status, IF THIS IS REQUIRED BY SPECS
 * [Done] Add api for getting student's applications for admin
 * Allow job to have multiple eligible_programs
+* [Done] Separate is eligible logic into a different function
+* EWS, PWD
+* Use different function for checking eligibility in apply_job
