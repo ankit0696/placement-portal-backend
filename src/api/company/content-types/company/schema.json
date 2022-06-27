@@ -42,11 +42,12 @@
     "status": {
       "type": "enumeration",
       "enum": [
-        "registered",
+        "pending",
         "approved",
+        "rejected",
         "deactivated"
       ],
-      "default": "registered",
+      "default": "pending",
       "required": true
     }
   }
