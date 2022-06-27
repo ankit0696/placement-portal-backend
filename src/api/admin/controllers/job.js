@@ -1,3 +1,5 @@
+const { helper_get_applications } = require("../../student/controllers/job");
+
 module.exports = {
     /**
      * @description Searches the jobs db to look for eligible jobs for given roll number
@@ -179,6 +181,31 @@ module.exports = {
         eligible_jobs = eligible_jobs.filter((_, index) => exists[index]);
 
         ctx.body = eligible_jobs;
+    },
+
+    /**
+     * @description Searches the applications collection to look for applied jobs for given roll number
+     * Note: This function can also be used in admin routes, eg.
+     * 
+     * @queryParam {String} roll
+     * 
+     * @example http://localhost:3000/api/admin/job/applied-jobs?roll=1
+     * @auth Admin only
+     * 
+     * @note This is a duplicate API of student.get_applied_jobs, this is for admin
+     * 
+     * @returns Array of applications, each object containing application for one job
+     */
+    async get_applied_jobs(ctx) {
+        const { roll } = ctx.query;
+
+        if (!roll) {
+            return ctx.badRequest("Missing roll number", { received_roll: roll || null });
+        }
+
+        const applied_jobs = helper_get_applications(roll);
+
+        ctx.body = applied_jobs;
     },
 };
 

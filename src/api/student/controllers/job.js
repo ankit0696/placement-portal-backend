@@ -1,6 +1,47 @@
 'use strict';
 
 module.exports = {
+    // TODO: Try reducing redundant code
+    async helper_is_job_eligible() {
+
+    },
+
+    /**
+     * Helper Function: To get applications of student, to tell which jobs the student has applied to,
+     * (regardless of the application status)
+     * 
+     * Note: This function can also be used in admin routes, eg. /api/admin/job/applied-jobs?roll=190430
+     * 
+     * @param {string/number} roll - Roll number of the student, whose applications are to be fetched 
+     * @returns 
+     */
+    async helper_get_applications(roll) {
+        const student_self = await strapi.db.query("api::student.student").findOne({
+            where: {
+                roll: roll,
+            },
+            select: ["id", "approved"]
+        });
+        if (!student_self) {
+            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
+        }
+
+        const { id, approved } = student_self;
+
+        if (approved !== "approved") {
+            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        const applied_jobs = await strapi.db.query("api::application.application").findMany({
+            where: {
+                student: id,
+            },
+            populate: ["student", "job.company", "job.jaf"]
+        });
+
+        return applied_jobs;
+    },
+
     /**
      * @description Searches the jobs db to look for eligible jobs for current student
      * 
@@ -53,7 +94,7 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
         }
 
-        if(cpi === undefined) {
+        if (cpi === undefined) {
             return ctx.badRequest(null, [{ messages: [{ id: "CPI not updated yet" }] }]);
         }
 
@@ -68,9 +109,6 @@ module.exports = {
                 min_cpi: {
                     $lte: cpi
                 },
-                // eligible_program is a mandatory field in Job collection,
-                // and must contain name of only 1 program, eg. B.Tech
-                eligible_program: program,
 
                 // Only jobs that are approved will be shown to student
                 approval_status: "approved",
@@ -91,6 +129,13 @@ module.exports = {
         // Assumption: job.eligible_departments is a string of comma-separated
         // CASE-INSENSITIVE department names, eg. "mathematics,computer science"
         eligible_jobs = eligible_jobs.filter(job => {
+            // Filter based on job.eligible_programs
+            // eligible_programs is a mandatory field in Job collection,
+            // and must contain name of only 1 program, eg. B.Tech
+            // TODO
+            // eligible_programs: program,
+
+
             // Filter based on job.eligible_departments if it's not empty
             if (job.eligible_departments) {
                 // Case insensitive
@@ -98,7 +143,7 @@ module.exports = {
                 let lowercase_eligible_dep = job.eligible_departments.toLowerCase().split(",");
 
                 // If NONE of the eligible departments match the student's department, then return false
-                if(!lowercase_eligible_dep.includes(lowercase_dep)) {
+                if (!lowercase_eligible_dep.includes(lowercase_dep)) {
                     return false;
                 }
             }
@@ -106,7 +151,7 @@ module.exports = {
             // Filter based on job.start_date and job.last_date
             try {
                 // If job.start_date is not empty, then check if it's in the future, if so return false
-                if(job.start_date) {
+                if (job.start_date) {
                     let start_date = new Date(job.start_date);
                     if (start_date > new Date()) {
                         return false;
@@ -133,7 +178,7 @@ module.exports = {
             },
             populate: ["job"]
         });
-        console.log({selected_applications});
+        console.log({ selected_applications });
 
         // Date at which student was first selected in A2 (if any)
         const first_A2_application = selected_applications.find(appl => appl.job.category === "A2") || null;
@@ -146,13 +191,13 @@ module.exports = {
                 job: { classification: "A1" }
             },
         })).filter(application => {
-            if( date_A2_selection ) {
+            if (date_A2_selection) {
                 return Date.parse(application.createdAt) > date_A2_selection;
             }
             return true;
         }).length;
 
-        console.log({date_A2_selection, num_new_A1_application});
+        console.log({ date_A2_selection, num_new_A1_application });
 
         const already_selected_A1 = (
             selected_applications
@@ -361,31 +406,10 @@ module.exports = {
     async get_applied_jobs(ctx) {
         const user = ctx.state.user;
 
-        if (!user) {
+        if (!user || !user.username) {
             return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
         }
-        const student_self = await strapi.db.query("api::student.student").findOne({
-            where: {
-                roll: user.username,
-            },
-            select: ["id", "approved"]
-        });
-        if (!student_self) {
-            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
-        }
-
-        const { id, approved } = student_self;
-
-        if (approved !== "approved") {
-            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
-        }
-
-        const applied_jobs = await strapi.db.query("api::application.application").findMany({
-            where: {
-                student: id,
-            },
-            populate: ["student", "job.company", "job.jaf"]
-        });
+        const applied_jobs = this.helper_get_applications(user.username);
 
         ctx.body = applied_jobs;
     },
