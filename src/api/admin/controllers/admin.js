@@ -6,28 +6,33 @@
 
 module.exports = {
   /**
-   * NOTE: A settings entry MUST exist in the settings collection for these both routes to work
+   * @description: API to get global settings, such as registrations allowed or changing cpi allowed etc.
+   * 
+   * @auth This will be accessible to PUBLIC, without authentication
+   * 
+   * @note
+   * - A settings entry MUST exist in the settings collection for these both routes to work
+   * - You will require to create it manually from the strapi's admin UI, before using these APIs
    *
-   * You will require to create it manually from the strapi's admin UI, before using these APIs
+   * @example: [GET] `/api/admin/settings`
    *
-   * NOTE2: This will be accessible to PUBLIC, without authentication
+   * @body Expected body as { "registrations_allowed": true, "cpi_change_allowed": true }
    */
-
-  /**
-   * Route: [GET] `/api/admin/settings`
-   **/
   get_settings: async (ctx) => {
-    /* This function known from node_modules/@strapi/plugin-users-permissions/server/controllers/settings.js -> getAdvancedSettings */
-    const strapi_settings = await strapi
-      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+    /*
+      // This function known from node_modules/@strapi/plugin-users-permissions/server/controllers/settings.js -> getAdvancedSettings
+      // This is internal logic, no need to return it
+      const strapi_settings = await strapi
+        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
+        .get();
 
-    if (!strapi_settings) {
-      return ctx.internalServerError(null, [{ messages: [{ id: "Could not get strapi settings" }] }]);
-    }
+      if (!strapi_settings) {
+        return ctx.internalServerError(null, [{ messages: [{ id: "Could not get strapi settings" }] }]);
+      }
 
-    const strapi_registrations_allowed = strapi_settings["allow_register"];
-    const strapi_default_role = strapi_settings["default_role"];
+      const strapi_registrations_allowed = strapi_settings["allow_register"];
+      const strapi_default_role = strapi_settings["default_role"];
+    */
 
     // Query first entry of strapi settings collection
     const settings = await strapi.query('api::setting.setting').findOne({});
@@ -39,32 +44,25 @@ module.exports = {
     const {registrations_allowed, cpi_change_allowed} = settings;
 
     ctx.body = {
-      strapi_registrations_allowed,     /*This is an internal property, don't use it*/
-      strapi_default_role,              /*This is an internal property, don't use it*/
+      // strapi_registrations_allowed,     /*This is an internal property, don't use it*/
+      // strapi_default_role,              /*This is an internal property, don't use it*/
       registrations_allowed,
       cpi_change_allowed
     };
   },
 
   /**
-   * API to change global settings, such as allowing registrations or allowing cpi etc.
+   * @description: API to change global settings, such as allowing registrations or allowing cpi etc.
    * 
-   * NOTE: This intentionally does NOT return anything to caller
+   * @auth Authentication with 'admin' role is required
+   * 
+   * @note
+   * - This intentionally does NOT return anything to caller
+   * - For getting settings, use get_settings(), that way caller can be sure that it's modified
    *
-   * Route: [POST] `/api/admin/settings`
+   * @example: [POST] `/api/admin/settings`
    *
-   * Expected body as {
-   *    "registrations_allowed": true,
-   *    "cpi_change_allowed": true
-   * }
-   *
-   * NOTE: If registrations_allowed is given, then strapi_registrations_allowed will also be set to passed value
-   *
-   * NOTE2: Authentication with 'admin' role is required
-   *
-   * NOTE3: Removed logic to change internal 'allow_register' property in strapi, since if registrations_allowed is set, then we just want students to not register, all other registrations should work, and they require the user registrations (/api/auth/local/register to work)
-   *
-   * For that, you should use get_settings(), that way caller can be sure that it is modified
+   * @body Expected body as { "registrations_allowed": true, "cpi_change_allowed": true }
    */
   change_settings: async (ctx) => {
     const settings_to_change = {};
