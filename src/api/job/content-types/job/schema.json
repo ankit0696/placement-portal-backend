@@ -20,7 +20,7 @@
     "job_title": {
       "type": "string",
       "required": true,
-      "unique": true
+      "unique": false
     },
     "jaf": {
       "type": "media",
