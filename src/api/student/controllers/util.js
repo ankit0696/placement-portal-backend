@@ -27,6 +27,11 @@ module.exports = {
      *   eg. "mathematics,computer science"
      * - job.eligible_programs is a string of comma-separated program names,
      *   eg. "B.Tech,M.Tech" (Single is also okay, in that case, comma is not required)
+     * - job status terminology:
+     *   - "open" - job is open for new applications
+     *   - "ongoing" - no more applications, selection in process for older ones
+     *   - "results_declared" - no more applications, results are declared
+     *   - "abandoned" - no more applications, job is abandoned
      * 
      * @checks
      * To be eligible for a job:
@@ -136,10 +141,12 @@ module.exports = {
                     }
                 }
 
-                let last_date = new Date(job.last_date);
+                if (job.last_date) {
+                    let last_date = new Date(job.last_date);
 
-                if (last_date < Date.now()) {
-                    return false /* Last date has passed */;
+                    if (last_date < Date.now()) {
+                        return false /* Last date has passed */;
+                    }
                 }
             } catch (e) {
                 console.log(
