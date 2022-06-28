@@ -12,7 +12,7 @@ module.exports = {
      * @notes
      * - All parameters are mandatory
      * - Some fields in student collection are relations, so they need to be populated,
-     *   eg. student.program, student.department
+     *   eg. student.course
      * - selected_applications should contain "all" applications for which the student has
      *   already been selected, irrespective of any other condition, eg. FTE/Internship
      *   Example:
@@ -25,10 +25,7 @@ module.exports = {
      *       });
      * 
      * @assumptions
-     * - job.eligible_departments is a string of comma-separated department names,
-     *   eg. "mathematics,computer science"
-     * - job.eligible_programs is a string of comma-separated program names,
-     *   eg. "B.Tech,M.Tech" (Single is also okay, in that case, comma is not required)
+     * - job.eligible_courses is a string of comma-separated course IDs, eg. "1,2,5"
      * - job status terminology:
      *   - "open" - job is open for new applications
      *   - "ongoing" - no more applications, selection in process for older ones
@@ -38,8 +35,7 @@ module.exports = {
      * @checks
      * To be eligible for a job:
      * - job minimum marks are less than or equal to student's marks, X, XII, CPI
-     * - job is eligible for student's program, eg B.Tech
-     * - job is eligible for student's department
+     * - job is eligible for student's course
      * - job category matches student's registerd_for category, eg. Internship/FTE
      * - job is approved by admin
      * - job status is open
@@ -62,9 +58,8 @@ module.exports = {
         // Instead of silently returning false, I am throwing an error, this may
         // cause some 500s initially, but will likely reduce silent eligibility
         // bugs in the long run
-        const { id, X_marks, XII_marks, cpi, registered_for, department, program } = student;
-        if (!id || !X_marks || !XII_marks || !cpi || !registered_for ||
-            !department || !program) {
+        const { id, X_marks, XII_marks, cpi, registered_for, course } = student;
+        if (!id || !X_marks || !XII_marks || !cpi || !registered_for || !course ) {
             throw `Some mandatory parameters not passed, or are null: ${student, job}`;
         }
 
@@ -107,32 +102,11 @@ module.exports = {
         }
 
         {
-            // Filter based on job.eligible_programs
-            if (job.eligible_programs) {
-                // Case insensitive
-                let lowercase_prog = program["program_name"].toLowerCase().trim();
-                let lowercase_eligible_progs = job.eligible_programs.toLowerCase()
-                                                    .split(",")
-                                                    .map(p => p.trim());
-
-                // If NONE of the eligible departments match the student's department,
-                // then return false
-                if (!lowercase_eligible_progs.includes(lowercase_prog)) {
-                    return false /* Job is not for the student's program */;
-                }
-            }
-
-            // Filter based on job.eligible_departments if it's not empty
-            if (job.eligible_departments) {
-                // Case insensitive
-                let lowercase_dep = department["department_name"].toLowerCase().trim();
-                let lowercase_eligible_deps = job.eligible_departments.toLowerCase()
-                                                    .split(",")
-                                                    .map(d => d.trim());
-
-                // If NONE of the eligible departments match the student's department, then return false
-                if (!lowercase_eligible_deps.includes(lowercase_dep)) {
-                    return false /* Job is not for the student's department */;
+            // Filter based on job.eligible_courses
+            if (job.eligible_courses) {
+                const eligible_course_ids = job.eligible_courses.split(",").map(id => parseInt(id));
+                if (!eligible_course_ids.includes(course.id)) {
+                    return false /* Student's course is not eligible for this job */;
                 }
             }
         }
@@ -156,7 +130,7 @@ module.exports = {
                     }
                 }
             } catch (e) {
-                console.log(
+                console.error(
                     `WARNING: Job start_date or last_date is not a valid date:`,
                     `${job.start_date} or ${job.last_date}`
                 );

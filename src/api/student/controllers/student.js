@@ -71,19 +71,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
 
     {
-      // Ensure data["program"] is valid
-      const program = await strapi.query('api::program.program').findOne({
-        where: {
-          program_name: data["program"]
-        },
-      });
-
-      if (!program) {
-        return ctx.badRequest(null, [{ messages: [{ id: "Invalid program" }] }]);
-      } else {
-        // Replace data["program"] with program.id
-        data["program"] = program.id;
-      }
+      // NOTE: Regarding 'program' and 'course', frontend itself will send ID, so just
+      //       let it pass through to strapi
 
       // Ensure data["department"] is valid
       const department = await strapi.query('api::department.department').findOne({
@@ -91,7 +80,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
           department_name: data["department"]
         }
       });
-      
+
       if (!department) {
         return ctx.badRequest(null, [{ messages: [{ id: "Invalid department" }] }]);
       } else {
@@ -100,7 +89,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       }
     }
 
-    /** NOTE: This directly modifies the ctx.request.body["data"], which we want, since ctx is to be passed to this.create */
+    // NOTE: This directly modifies the ctx.request.body["data"], which we want,
+    // since ctx is to be passed to this.create
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
 
@@ -197,8 +187,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {}
     });
     if ( !setting ) {
-      console.log("[student: modify] Failed to get global settings for CPI change allowed or not");
-      console.log("[student: modify]     Not responding with failure, since it by default won't be modifiable");
+      console.error("[student: modify] Failed to get global settings for CPI change allowed or not");
+      console.error("[student: modify]     Not responding with failure, since it by default won't be modifiable");
       // return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings" }] }]);
     }
 

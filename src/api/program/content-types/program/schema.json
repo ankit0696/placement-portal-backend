@@ -14,12 +14,19 @@
   "attributes": {
     "program_name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "unique": true
     },
     "students": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::student.student",
+      "mappedBy": "program"
+    },
+    "courses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::course.course",
       "mappedBy": "program"
     }
   }

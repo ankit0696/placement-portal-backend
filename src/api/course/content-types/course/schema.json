@@ -1,10 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "departments",
+  "collectionName": "courses",
   "info": {
-    "singularName": "department",
-    "pluralName": "departments",
-    "displayName": "Department",
+    "singularName": "course",
+    "pluralName": "courses",
+    "displayName": "Course",
     "description": ""
   },
   "options": {
@@ -12,16 +12,21 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "department_name": {
+    "course_name": {
       "type": "string",
-      "unique": true,
       "required": true
     },
     "students": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::student.student",
-      "mappedBy": "department"
+      "mappedBy": "course"
+    },
+    "program": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::program.program",
+      "inversedBy": "courses"
     }
   }
 }

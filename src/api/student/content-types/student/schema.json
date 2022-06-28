@@ -136,14 +136,6 @@
     "master_marks": {
       "type": "string"
     },
-    "course": {
-      "type": "enumeration",
-      "enum": [
-        "Mathematics & Computing",
-        "Mechatronics"
-      ],
-      "required": true
-    },
     "address": {
       "type": "text",
       "required": true
@@ -182,6 +174,12 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::program.program",
+      "inversedBy": "students"
+    },
+    "course": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::course.course",
       "inversedBy": "students"
     },
     "department": {
