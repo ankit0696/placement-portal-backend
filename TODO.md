@@ -54,5 +54,5 @@
 * [Done] Settings
 * [Done] Programs, Departments
 * [Done] Create Program and Department relation in student [NOTE: Created a oneToMany relation from Program/Department -> Student]
-* Remove login_plus_role, register_plus_role
+* [Done] Remove login_plus_role, register_plus_role
 * There are two get applications for student: applications.findMe, job.get_applied_jobs
