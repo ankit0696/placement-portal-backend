@@ -11,6 +11,16 @@ module.exports = {
      * 
      * @notes
      * - All parameters are mandatory
+     * - selected_applications should contain "all" applications for which the student has
+     *   already been selected, irrespective of any other condition, eg. FTE/Internship
+     *   Example:
+     *       const selected_applications = await strapi.db.query("api::application.application").findMany({
+     *         where: {
+     *             student: id,
+     *             status: "selected"
+     *         },
+     *         populate: ["job"]
+     *       });
      * 
      * @assumptions
      * - job.eligible_departments is a string of comma-separated department names,
@@ -31,8 +41,9 @@ module.exports = {
      * - job is not already applied by student
      * - If job.only_for_ews, then only EWS students are eligible
      * - If job.only_for_pwd, then only PWD students are eligible
+     * - If already selected in an "Internship" then ineligible for other "Internships"
      *
-     * More conditions based on past applications:
+     * More conditions for "FTE" Jobs based on past applications:
      * - 1. If job.classification is "X", then the 'below' 3 conditions will be null and void
      * - 2. If selected in A1 => out of placement, not eligible
      * - 3. If selected in A2, then 3 more A1 applications allowed, AFTER selected in A2
@@ -151,7 +162,16 @@ module.exports = {
             if (existing_application) return false /* Already applied */;
         }
 
-        {
+	if ( job.classification == "Internship" ) {
+            const existing_internship_selection = selected_applications
+                .find(appl => appl.job.classification == "Internship");
+
+            if (existing_internship_selection) {
+                return false /* Already selected in an Internship */;
+            }
+	}
+
+        if ( job.classification == "FTE" ) {
             // Check the extra conditions, based on already selected applications
             // console.debug({ selected_applications });
 
@@ -251,3 +271,5 @@ module.exports = {
         return applied_jobs;
     },
 };
+
+// ex: shiftwidth=4 expandtab:
