@@ -14,15 +14,9 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   async findMe(ctx) {
     const user = ctx.state.user;
 
-    // Can use this if using this.findOne, instead of querying by self, Since the context will be passed to this.findOne, passing populate: * to populate all fields
-    // But not doing that since even for this.findOne we require student.id for which at least one query is eitherway required
-    // console.log({ query: ctx.request.query });
-    // ctx.request.query = { "populate": "*", filter: "id=1" ...ctx.request.query };
-
     if (!user) {
       return ctx.badRequest(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
     }
-    // TODO: Possible reduce all populate: "*" with only required fields to be populated :)
     const data = await strapi.db.query("api::student.student").findOne({
       populate: true,
       where: {
@@ -53,7 +47,6 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
 
     {
-
       /** Check if administrator has blocked new registrations */
       const setting = await strapi.query('api::setting.setting').findOne({
         where: {}
@@ -77,6 +70,30 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
+    {
+      // Ensure data["program"] is valid
+      const program = await strapi.query('api::program.program').findOne({
+        where: {
+          program_name: data["program"]
+        }
+      });
+
+      if (!program) {
+        return ctx.badRequest(null, [{ messages: [{ id: "Invalid program" }] }]);
+      }
+
+      // Ensure data["department"] is valid
+      const department = await strapi.query('api::department.department').findOne({
+        where: {
+          department_name: data["department"]
+        }
+      });
+      
+      if (!department) {
+        return ctx.badRequest(null, [{ messages: [{ id: "Invalid department" }] }]);
+      }
+    }
+
     /** NOTE: This directly modifies the ctx.request.body["data"], which we want, since ctx is to be passed to this.create */
     // Ensure, sender did not sender with "approved: approved"
     data["approved"] = "pending";
@@ -93,14 +110,15 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   },
 
   /**
-   * Route to modify given keys for the current user
+   * @description Route to modify given keys for the current user
    * 
-   * NOTE1: request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
+   * @notes
+   * - request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
    * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050","resume": File }, ie. NOT like { "data": {"name": "koi"} }
    * This was made to accommodate both types of input, as body and form-data
+   * - Most fields cannot be updated after student clicks "Submit for approval"
    *
-   * Note2: Requires authentication
-   * Note3: Most fields cannot be updated after student clicks "Submit for approval"
+   * @auth Requires authentication with 'student' role
    */
   async modify_multiple(ctx) {
     if (!ctx.is('multipart')) {
@@ -141,8 +159,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // Most mandatory components locked after approval of the profile (ie. only allowed to change before approval).
     // CPI can be updated when allowed by admin
     const fields_allowed_before_approval = [
-      "name", "roll", "gender", "date_of_birth", "category", "rank", "registered_for", "program",
-      "department", "course", "address", "X_marks", "XII_marks",
+      "name", "roll", "gender", "date_of_birth", "category", "rank", "registered_for",
+      "course", "address", "X_marks", "XII_marks",
       "ug_college", "ug_cpi",
     ];
 

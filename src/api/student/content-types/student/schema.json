@@ -67,16 +67,6 @@
     "mobile_number_2": {
       "type": "biginteger"
     },
-    "program": {
-      "type": "enumeration",
-      "enum": [
-        "B.Tech",
-        "M.Tech",
-        "M.Sc",
-        "BS"
-      ],
-      "required": true
-    },
     "date_of_birth": {
       "type": "date",
       "required": true
@@ -146,14 +136,6 @@
     "master_marks": {
       "type": "string"
     },
-    "department": {
-      "type": "enumeration",
-      "enum": [
-        "mathematics",
-        "computer science "
-      ],
-      "required": true
-    },
     "course": {
       "type": "enumeration",
       "enum": [
@@ -194,6 +176,14 @@
     },
     "pwd": {
       "type": "boolean",
+      "required": true
+    },
+    "program": {
+      "type": "string",
+      "required": true
+    },
+    "department": {
+      "type": "string",
       "required": true
     }
   }

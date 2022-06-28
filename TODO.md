@@ -52,4 +52,4 @@
 * [Done] EWS, PWD
 * [Done] Use different function for checking eligibility in apply_job
 * [Done] Settings
-* Programs, Departments
+* [Done] Programs, Departments

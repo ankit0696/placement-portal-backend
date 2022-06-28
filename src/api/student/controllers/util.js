@@ -108,10 +108,13 @@ module.exports = {
             // Filter based on job.eligible_programs
             if (job.eligible_programs) {
                 // Case insensitive
-                let lowercase_prog = program.toLowerCase();
-                let lowercase_eligible_progs = job.eligible_programs.toLowerCase().split(",");
+                let lowercase_prog = program.toLowerCase().trim();
+                let lowercase_eligible_progs = job.eligible_programs.toLowerCase()
+                                                    .split(",")
+                                                    .map(p => p.trim());
 
-                // If NONE of the eligible departments match the student's department, then return false
+                // If NONE of the eligible departments match the student's department,
+                // then return false
                 if (!lowercase_eligible_progs.includes(lowercase_prog)) {
                     return false /* Job is not for the student's program */;
                 }
@@ -120,8 +123,10 @@ module.exports = {
             // Filter based on job.eligible_departments if it's not empty
             if (job.eligible_departments) {
                 // Case insensitive
-                let lowercase_dep = department.toLowerCase();
-                let lowercase_eligible_deps = job.eligible_departments.toLowerCase().split(",");
+                let lowercase_dep = department.toLowerCase().trim();
+                let lowercase_eligible_deps = job.eligible_departments.toLowerCase()
+                                                    .split(",")
+                                                    .map(d => d.trim());
 
                 // If NONE of the eligible departments match the student's department, then return false
                 if (!lowercase_eligible_deps.includes(lowercase_dep)) {
