@@ -53,3 +53,4 @@
 * [Done] Use different function for checking eligibility in apply_job
 * [Done] Settings
 * [Done] Programs, Departments
+* [Done] Create Program and Department relation in student [NOTE: Created a oneToMany relation from Program/Department -> Student]

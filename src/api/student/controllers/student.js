@@ -75,11 +75,14 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       const program = await strapi.query('api::program.program').findOne({
         where: {
           program_name: data["program"]
-        }
+        },
       });
 
       if (!program) {
         return ctx.badRequest(null, [{ messages: [{ id: "Invalid program" }] }]);
+      } else {
+        // Replace data["program"] with program.id
+        data["program"] = program.id;
       }
 
       // Ensure data["department"] is valid
@@ -91,6 +94,9 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       
       if (!department) {
         return ctx.badRequest(null, [{ messages: [{ id: "Invalid department" }] }]);
+      } else {
+        // Replace data["department"] with department.id
+        data["department"] = department.id;
       }
     }
 

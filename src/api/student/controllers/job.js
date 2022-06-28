@@ -27,6 +27,7 @@ module.exports = {
             where: {
                 roll: user.username,
             },
+            populate: ["program", "department"]
         });
         if (!student_self) {
             return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);

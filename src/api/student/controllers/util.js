@@ -11,6 +11,8 @@ module.exports = {
      * 
      * @notes
      * - All parameters are mandatory
+     * - Some fields in student collection are relations, so they need to be populated,
+     *   eg. student.program, student.department
      * - selected_applications should contain "all" applications for which the student has
      *   already been selected, irrespective of any other condition, eg. FTE/Internship
      *   Example:
@@ -108,7 +110,7 @@ module.exports = {
             // Filter based on job.eligible_programs
             if (job.eligible_programs) {
                 // Case insensitive
-                let lowercase_prog = program.toLowerCase().trim();
+                let lowercase_prog = program["program_name"].toLowerCase().trim();
                 let lowercase_eligible_progs = job.eligible_programs.toLowerCase()
                                                     .split(",")
                                                     .map(p => p.trim());
@@ -123,7 +125,7 @@ module.exports = {
             // Filter based on job.eligible_departments if it's not empty
             if (job.eligible_departments) {
                 // Case insensitive
-                let lowercase_dep = department.toLowerCase().trim();
+                let lowercase_dep = department["department_name"].toLowerCase().trim();
                 let lowercase_eligible_deps = job.eligible_departments.toLowerCase()
                                                     .split(",")
                                                     .map(d => d.trim());
