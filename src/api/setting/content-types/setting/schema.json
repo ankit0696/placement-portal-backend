@@ -1,10 +1,11 @@
 {
-  "kind": "collectionType",
+  "kind": "singleType",
   "collectionName": "settings",
   "info": {
     "singularName": "setting",
     "pluralName": "settings",
-    "displayName": "Setting"
+    "displayName": "Settings",
+    "description": ""
   },
   "options": {
     "draftAndPublish": false

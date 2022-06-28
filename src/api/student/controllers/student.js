@@ -53,16 +53,16 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
 
     {
-      /** Check if administrator has blocked new registrations */
-      const settings = await strapi.query('api::setting.setting').findOne({
-        select: ["registrations_allowed"]
-      });
 
-      if (!settings) {
+      /** Check if administrator has blocked new registrations */
+      const setting = await strapi.query('api::setting.setting').findOne({
+        where: {}
+      });
+      if ( !setting ) {
         return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings for registrations allowed or not" }] }]);
       }
 
-      if (settings["registrations_allowed"] == false) {
+      if (setting["registrations_allowed"] == false) {
         return ctx.badRequest(null, [{ messages: [{ id: "Registrations are not allowed. Please contact Administrator" }] }])
       }
     }
@@ -169,18 +169,17 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
 
     /** Check if Administrator has allowed changing SPIs and CPIs */
-    const settings = await strapi.query('api::setting.setting').findOne({
-      select: ["cpi_change_allowed"]
+    const setting = await strapi.query('api::setting.setting').findOne({
+      where: {}
     });
-
-    if (!settings) {
+    if ( !setting ) {
       console.log("[student: modify] Failed to get global settings for CPI change allowed or not");
       console.log("[student: modify]     Not responding with failure, since it by default won't be modifiable");
-      // return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings for CPI change allowed or not" }] }]);
+      // return ctx.internalServerError(null, [{ messages: [{ id: "Failed to get global settings" }] }]);
     }
 
     // If allowed, allow fields given in `cpi_spi_fields` array to be modified
-    if (settings["cpi_change_allowed"] == true) {
+    if (setting["cpi_change_allowed"] == true) {
       for(const field in body) {
         if( cpi_spi_fields.includes(field) ) {
           fields_to_modify[field] = body[field];
@@ -237,3 +236,5 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     }
   },
 }));
+
+// ex: shiftwidth=2 expandtab:
