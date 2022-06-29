@@ -70,24 +70,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Username does not match with roll number" }] }]);
     }
 
-    {
-      // NOTE: Regarding 'program' and 'course', frontend itself will send ID, so just
-      //       let it pass through to strapi
-
-      // Ensure data["department"] is valid
-      const department = await strapi.query('api::department.department').findOne({
-        where: {
-          department_name: data["department"]
-        }
-      });
-
-      if (!department) {
-        return ctx.badRequest(null, [{ messages: [{ id: "Invalid department" }] }]);
-      } else {
-        // Replace data["department"] with department.id
-        data["department"] = department.id;
-      }
-    }
+    // NOTE: Regarding 'department', 'program' and 'course', frontend itself will send ID,
+    //       so just let it pass through to strapi
 
     // NOTE: This directly modifies the ctx.request.body["data"], which we want,
     // since ctx is to be passed to this.create

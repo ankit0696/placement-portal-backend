@@ -103,7 +103,7 @@
     },
     "eligible_courses": {
       "type": "string",
-      "required": false
+      "required": true
     }
   }
 }
