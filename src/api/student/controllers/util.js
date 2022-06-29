@@ -104,7 +104,7 @@ module.exports = {
         {
             // Filter based on job.eligible_courses
             if (job.eligible_courses) {
-                const eligible_course_ids = job.eligible_courses.split(",").map(id => parseInt(id));
+                const eligible_course_ids = job.eligible_courses.split(",").map(id => parseInt(id.trim()));
                 if (!eligible_course_ids.includes(course.id)) {
                     return false /* Student's course is not eligible for this job */;
                 }
