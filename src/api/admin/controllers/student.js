@@ -2,6 +2,7 @@ const { helper_is_job_eligible, helper_get_applications } = require("../../stude
 const AdmZip = require("adm-zip");
 const { readFileSync } = require("fs");
 const path = require("path");
+const process = require("process");
 
 module.exports = {
     /**
@@ -133,13 +134,13 @@ module.exports = {
         const zip = new AdmZip();
         // roll_arr.forEach is async, so using Promise.all
         await Promise.all(roll_arr.map(async (roll) => {
+            // FUTURE: Truly using asynchronously can make the whole call faster
             const student = await strapi.db.query("api::student.student").findOne({
                 where: {
                     roll: roll,
                 },
                 populate: ["resume"]
             });
-            console.log({student});
 
             // If any student roll number is invalid, just return 400
             if (!student) {
@@ -148,10 +149,20 @@ module.exports = {
 
             // Ignore if student has no resume
             if (student.resume) {
-                // FUTURE: Truly using asynchronously can make the whole call faster
-                // Join "../../../../public/" and student.resume.url
-                // TODO: Make it work on production too, how to find path to `public` folder?
-                const file_path = path.join(__dirname, "../../../../public/", student.resume.url);
+                /**
+                 * Working:
+                 * 1. student.resume.url is something like "/uploads/Resume_15984.pdf"
+                 * 2. But that path is relative to `public` directory
+                 * 3. On localhost, the public directory is at $ThisProjectRoot/public,
+                 *    and can use relative path ../../../../public
+                 * 4. But, that is only for localhost
+                 * 5. Could not find a way in strapi to get the absolute path of the public directory
+                 * 6. So, I used some hacky way, matlab the server runs at the root of the project,
+                 *    ie. the process's Current Working Directory is the root of the project
+                 * 7. So, path to public folder is `${process.cwd()}/public`
+                 * 8. Then, simply add the resume url, we will get the absolute path to resume file
+                 */
+                const file_path = path.join(process.cwd(), "public", student.resume.url);
                 const buff = readFileSync(file_path);
                 // Name of the file is the roll number.pdf
                 zip.addFile(`${roll}.pdf`, buff);
