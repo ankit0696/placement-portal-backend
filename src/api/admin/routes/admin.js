@@ -12,10 +12,28 @@ module.exports = {
     {
       method: 'GET',
       path: '/admin/eligiblejobs',
-      handler: 'job.get_eligible_jobs',
+      handler: 'student.get_eligible_jobs',
+      config: {
+        policies: []
+      }
+    },
+    {
+      method: 'GET',
+      path: '/admin/appliedjobs',
+      handler: 'student.get_applied_jobs',
+      config: {
+        policies: []
+      }
+    },
+    {
+      method: 'GET',
+      path: '/admin/resume-zip',
+      handler: 'student.resume_zip',
       config: {
         policies: []
       }
     }
   ],
 };
+
+// ex: shiftwidth=2 expandtab:
