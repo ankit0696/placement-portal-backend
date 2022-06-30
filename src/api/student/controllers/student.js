@@ -75,8 +75,14 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // NOTE: This directly modifies the ctx.request.body["data"], which we want,
     // since ctx is to be passed to this.create
-    // Ensure, sender did not sender with "approved: approved"
-    data["approved"] = "pending";
+
+    {
+      // Ensure, sender did not sender with "approved: approved"
+      data["approved"] = "pending";
+
+      // Ensure placed_status: "unplaced"
+      data["placed_status"] = "unplaced";
+    }
 
     // Give user id of related entry in Users collection, used for auth
     data["user_relation"] = user.id;
@@ -97,6 +103,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050","resume": File }, ie. NOT like { "data": {"name": "koi"} }
    * This was made to accommodate both types of input, as body and form-data
    * - Most fields cannot be updated after student clicks "Submit for approval"
+   * - By default only selected fields at end of this function can be modified,
+   *   ie. if a field name is not mentioned in this function, IT CANNOT BE CHANGED
    *
    * @auth Requires authentication with 'student' role
    */

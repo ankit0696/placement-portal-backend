@@ -187,6 +187,16 @@
       "relation": "manyToOne",
       "target": "api::department.department",
       "inversedBy": "students"
+    },
+    "placed_status": {
+      "type": "enumeration",
+      "enum": [
+        "unplaced",
+        "placed_a1",
+        "placed_a2"
+      ],
+      "required": true,
+      "default": "unplaced"
     }
   }
 }
