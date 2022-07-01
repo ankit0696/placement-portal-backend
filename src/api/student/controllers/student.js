@@ -102,6 +102,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * - request body is slightly DIFFERENT than if passed to PUT request to strapi's REST apis
    * ie. ctx.request.body should be like: { "name":"Koi","roll": "1905050","resume": File }, ie. NOT like { "data": {"name": "koi"} }
    * This was made to accommodate both types of input, as body and form-data
+   * - Request body must be 'multipart/form-data'
    * - Most fields cannot be updated after student clicks "Submit for approval"
    * - By default only selected fields at end of this function can be modified,
    *   ie. if a field name is not mentioned in this function, IT CANNOT BE CHANGED
@@ -109,10 +110,6 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * @auth Requires authentication with 'student' role
    */
   async modify_multiple(ctx) {
-    if (!ctx.is('multipart')) {
-      return ctx.badRequest(null, [{ messages: [{ id: "This route expects multipart/form-data" }] }]);
-    }
-
     const user = ctx.state.user;
 
     if (!user) {
@@ -126,6 +123,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
     }
 
+    // console.debug({body, files: ctx.request.files, query: ctx.query});
+
     const student_data = await strapi.db.query("api::student.student").findOne({
       where: {
         roll: user.username,
@@ -137,6 +136,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.internalServerError(null, [{ messages: [{ id: "Failed to fetch student data" }] }]);
     }
 
+    // Note: Intentionally not checking `approved`, since student can modify some fields
     const { id, approved } = student_data;
 
     /**
