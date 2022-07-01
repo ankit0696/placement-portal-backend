@@ -56,4 +56,4 @@
 * [Done] Create Program and Department relation in student [NOTE: Created a oneToMany relation from Program/Department -> Student]
 * [Done] Remove login_plus_role, register_plus_role
 * [Done] There are two get applications for student: applications.findMe, job.get_applied_jobs. Removed applications.findMe
-* Zip of multiple resumes
+* [Done] Zip of multiple resumes
