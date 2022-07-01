@@ -59,7 +59,8 @@
       "enum": [
         "A1",
         "A2",
-        "X"
+        "X",
+        "none"
       ],
       "required": true
     },
