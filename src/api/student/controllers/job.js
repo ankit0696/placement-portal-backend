@@ -137,18 +137,20 @@ module.exports = {
             return ctx.badRequest(null, [{ messages: [{ id: "Required jobId in query" }] }]);
         }
 
-        // NOTE: The "id" here maybe different than user.id,
-        // since that refers to id in Users collection, 
-        // and this is in the Students collection
-        const student_self = await strapi.db.query("api::student.student").findOne({
+       const student_self = await strapi.db.query("api::student.student").findOne({
             where: {
                 roll: user.username,
             },
+            populate: ["program", "course", "department"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
+        // NOTE: The "id" here maybe different than user.id,
+        // since that refers to id in Users collection, 
+        // and this is in the Students collection
+        const { id, approved } = student_self;
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
         }
@@ -163,6 +165,17 @@ module.exports = {
         if (!job) {
             return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
         }
+
+        // Check applications in which student has been selected
+        const selected_applications = await strapi.db.query("api::application.application").findMany({
+            where: {
+                student: id,
+                status: "selected"
+            },
+            populate: ["job"]
+        });
+
+
 
         const is_eligible = await helper_is_job_eligible(student_self, job, selected_applications);
         if (!is_eligible) {
