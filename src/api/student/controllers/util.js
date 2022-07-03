@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * @description Wrapper for console.debug
+ * @need With help of this we can just comment this console.debug and all debug statements will be off
+ */
+function debug_reason(reason) {
+    console.debug("Ineligible reason: ", reason);
+}
+
 module.exports = {
     /**
      * Helper function to check if a student is eligible for a job
@@ -66,10 +74,12 @@ module.exports = {
         {
             // Basic job status checks
             if (job.approval_status != "approved") {
+                debug_reason("Job not approved");
                 return false /* Job has not yet been approved */;
             }
 
             if (job.job_status != "open") {
+                debug_reason("Job not open");
                 return false /* Job is not open for applications */;
             }
         }
@@ -77,27 +87,37 @@ module.exports = {
         {
             // Basic qualification checks
             if (job.min_X_marks > X_marks) {
+                debug_reason("X marks not sufficient");
                 return false /* Xth marks less than minimum required */;
             }
 
             if (job.min_XII_marks > XII_marks) {
+                debug_reason("XII marks not sufficient");
                 return false /* XIIth marks less than minimum required */;
             }
 
             if (job.min_cpi > cpi) {
+                debug_reason("CPI not sufficient");
                 return false /* CPI less than minimum required */;
             }
 
             if (job.category != registered_for) {
+                debug_reason("Job category does not match student's registered_for");
                 return false /* Job's category is not the one student registered for */;
             }
 
             if(job.only_for_ews) {
-                if(student.category != "ews") return false /* Job only for EWS */;
+                if(student.category != "ews") {
+                    debug_reason("Job only for EWS");
+                    return false /* Job only for EWS */;
+                }
             }
 
             if(job.only_for_pwd) {
-                if(student.pwd == false) return false /* Job only for PWD */;
+                if(student.pwd == false) {
+                    debug_reason("Job only for PWD");
+                    return false /* Job only for PWD */;
+                }
             }
         }
 
@@ -106,6 +126,7 @@ module.exports = {
             if (job.eligible_courses) {
                 const eligible_course_ids = job.eligible_courses.split(",").map(id => parseInt(id.trim()));
                 if (!eligible_course_ids.includes(course.id)) {
+                    debug_reason("Course not eligible");
                     return false /* Student's course is not eligible for this job */;
                 }
             }
@@ -118,6 +139,7 @@ module.exports = {
                 if (job.start_date) {
                     let start_date = new Date(job.start_date);
                     if (start_date > new Date()) {
+                        debug_reason("Job not yet started");
                         return false /* Start date yet to reach */;
                     }
                 }
@@ -126,6 +148,7 @@ module.exports = {
                     let last_date = new Date(job.last_date);
 
                     if (last_date < Date.now()) {
+                        debug_reason("Job already ended");
                         return false /* Last date has passed */;
                     }
                 }
@@ -147,7 +170,10 @@ module.exports = {
                     },
                 });
 
-            if (existing_application) return false /* Already applied */;
+            if (existing_application) {
+                debug_reason("Student already applied to this job");
+                return false /* Already applied */;
+            }
         }
 
 	if ( job.classification == "Internship" ) {
@@ -155,6 +181,7 @@ module.exports = {
                 .find(appl => appl.job.classification == "Internship");
 
             if (existing_internship_selection) {
+                debug_reason("Student already selected in an Internship");
                 return false /* Already selected in an Internship */;
             }
 	}
@@ -193,7 +220,7 @@ module.exports = {
 
             // Ensure condition 2 in "More conditions"
             if (already_selected_A1) {
-                console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A1`);
+                debug_reason("Student already selected in an A1 job");
                 return false;
             }
 
@@ -201,13 +228,13 @@ module.exports = {
             if (first_A2_application != null) {
                 // If selected in A2 already, then other A2 jobs not eligible now
                 if (job.classification === "A2") {
-                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Selected in A2`);
+                    debug_reason("Student already selected in an A2 job");
                     return false;
                 }
 
                 // Checking for 3 A1 applications condition
                 if (num_new_A1_application >= 3) {
-                    console.debug(`Roll: ${user.username}, Ineligible, Reason: Already applied for 3 A1 jobs`);
+                    debug_reason("Student has already selected 3 A1 jobs");
                     return false;
                 }
             }
@@ -215,7 +242,7 @@ module.exports = {
             // Ensures condition 4 in "More conditions"
             if (selected_applications.length >= 2) {
                 // Not eligible in any jobs
-                console.debug(`Roll: ${user.username}, Ineligible, Reason: Already selected for 2 jobs`);
+                debug_reason("Student has already been selected in 2 jobs");
                 return false;
             }
         }

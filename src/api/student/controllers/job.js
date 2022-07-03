@@ -115,6 +115,7 @@ module.exports = {
             },
             populate: ["company", "jaf"]
         });
+        // console.debug(all_jobs);
 
         ctx.body = all_jobs;
     },

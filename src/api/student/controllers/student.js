@@ -118,6 +118,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // console.log("Starting: ", { body: ctx.request.body, files: ctx.request.files, query: ctx.query });
 
+    const roll = user.username;
     const body = ctx.request.body;
     if (!body || typeof (body) !== "object") {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameteres" }] }]);
@@ -127,7 +128,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     const student_data = await strapi.db.query("api::student.student").findOne({
       where: {
-        roll: user.username,
+        roll: roll,
       },
       select: ["id", "approved"/*, "activated"*/]
     });
@@ -205,6 +206,10 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     const files_to_upload = {};
     for (const field in (ctx.request.files || {})) {
       if (media_fields.includes(field)) {
+        // Rename the file as `resume.pdf`
+        if(field == "resume") {
+          ctx.request.files[field].name = `${roll}.pdf`;
+        }
         files_to_upload[`files.${field}`] = ctx.request.files[field];
       }
     }

@@ -23,7 +23,7 @@ module.exports = {
         const { roll } = ctx.query;
 
         if (!roll) {
-            return ctx.badRequest("Missing roll number", { received_roll: roll || null });
+            return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number", received_roll: roll || null }] }]);
         }
 
         const student_self = await strapi.db.query("api::student.student").findOne({
@@ -102,7 +102,7 @@ module.exports = {
         const { roll } = ctx.query;
 
         if (!roll) {
-            return ctx.badRequest("Missing roll number", { received_roll: roll || null });
+            return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number", received_roll: roll || null }] }]);
         }
 
         const applied_jobs = await helper_get_applications(roll);
@@ -122,7 +122,7 @@ module.exports = {
         const { rolls } = ctx.query;
 
         if (!rolls) {
-            return ctx.badRequest("Missing roll numbers", { received_rolls: rolls || null });
+            return ctx.badRequest(null, [{ messages: [{ id: "Missing rolls number", received_rolls: rolls || null }] }]);
         }
 
         let roll_arr = rolls.split(',').map(s => s.trim()).filter(s => (s.length!==0));
