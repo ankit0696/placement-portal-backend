@@ -1,8 +1,8 @@
-/* Code copied/modified of 'callback' function, in node_modules/@strapi/plugin-users-permissions/server/controllers/auth.js
+/* Code taken from and modified of 'registered' function, in node_modules/@strapi/plugin-users-permissions/server/controllers/auth.js
  *
  * Reference for this: https://gist.github.com/bibekgupta3333/7c4d4ec259045d7089c36b5ae0c4e763#file-strapi_v4_user_register_override-js
  *
- * Modified to take role of user to register
+ * Modified to ensure username (ie. the roll number) of student matches given regex
  */
 'use strict';
 
@@ -15,6 +15,10 @@ const { ApplicationError, ValidationError } = utils.errors;
 
 const emailRegExp =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+// ie. Roll number regex as suggested by Mayank sir
+const userNameRegExp =
+  /^[0-9]{4}[a-zA-Z]{2}[0-9]{2}$/;
 
 async function sanitizeUser(user, ctx) {
   // NOTE: @adig Returning role too, with the user
@@ -51,7 +55,7 @@ const getService = name => {
 
 module.exports = {
   //   Register controller override
-  register_with_role: async (ctx) => {
+  register_student: async (ctx) => {
     const pluginStore = strapi.store({
       type: 'plugin',
       name: 'users-permissions',
@@ -86,33 +90,20 @@ module.exports = {
       );
     }
 
-    /** NOTE: @adig: possible value for `role` are "student", "coordinator" */
-    const role = params.role;
-
-    if (!role) {
-      throw new ValidationError('Please provide a role');
-    }
-
-    if (role == "admin") {
-      throw new ValidationError("Admin cannot create another admin user !");
-    }
+    /** NOTE: @adig: role is fixed as "student" since this is a Public API,
+     * see admin's register-with-role for better control API */
+    const role = "student";
 
     const role_entry = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: role }, select: ["id"] });
 
     if (!role_entry) {
-      /** role is not "student" nor "coordinator", ie. the role doesn't exist in user-permissions collection */
+      // `${role}` role doesn't exist in user-permissions collection
       throw new ValidationError("Please provide a valid role");
     }
 
     const role_id = role_entry.id;
-
-    // NOTE: Can use this to see all available roles
-    // const all_roles = await strapi
-    //   .query('plugin::users-permissions.role')
-    //   .findMany({ where: {} });
-    // console.log({ all_roles });
 
     // Check if the provided email is valid or not.
     const isEmail = emailRegExp.test(params.email);
@@ -121,6 +112,13 @@ module.exports = {
       params.email = params.email.toLowerCase();
     } else {
       throw new ValidationError('Please provide a valid email address');
+    }
+
+    // Check if the provided roll number (passed in params.username) is valid or not.
+    const isValidRoll = userNameRegExp.test(params.username);
+
+    if (!isValidRoll) {
+      throw new ValidationError('Please provide a valid roll number');
     }
 
     params.role = role_id;

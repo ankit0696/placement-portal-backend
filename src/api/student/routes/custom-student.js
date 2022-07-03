@@ -43,5 +43,16 @@ module.exports = {
       handler: "job.get_applied_jobs",
       policies: [],
     },
+    {
+      method: 'POST',
+      path: '/student/register-student',
+      handler: 'auth.register_student',
+      config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
+    },
   ],
 };
+
+// ex: shiftwidth=2 expandtab:
