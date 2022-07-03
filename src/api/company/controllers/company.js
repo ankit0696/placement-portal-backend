@@ -13,7 +13,7 @@ module.exports = createCoreController("api::company.company", ({ strapi }) => ({
   ** Requires request body is same as if passed to POST request to usual create entry through strapi REST api
   * ie. ctx.request.body should be like: { data: { 'company_name':'OSI','company_address': 'India' } }
   *
-  * Using this route ensures some pre-save checks, such as status MUST be set to "registered" initially, not yet approved
+  * Using this route ensures some pre-save checks, such as status MUST be set to "pending" initially, not yet approved
   */
   async register(ctx) {
     const { data } = ctx.request.body;
@@ -23,7 +23,7 @@ module.exports = createCoreController("api::company.company", ({ strapi }) => ({
     }
 
     // Ensure, sender did not sender with "status: approved"
-    data["status"] = "registered";
+    data["status"] = "pending";
 
     // NOTE: this may not be required, since we already modified ctx.request.body.data above
     ctx.request.body = { data };
