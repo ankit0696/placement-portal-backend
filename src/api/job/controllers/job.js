@@ -31,7 +31,7 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
     }
 
     // Check if company has been approved
-    const company = await strapi.services.company.findOne({ id: data.company });
+    const company = await strapi.db.query("api::company.company").findOne({ id: data.company });
     if (!company) {
       return ctx.badRequest(null, [{ messages: [{ id: "Company not found" }] }]);
     } else if (company.status !== "approved") {
