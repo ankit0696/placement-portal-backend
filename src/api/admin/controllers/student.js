@@ -52,7 +52,6 @@ module.exports = {
                 min_XII_marks: { $lte: XII_marks },
                 min_cpi: { $lte: cpi },
                 approval_status: "approved",
-                job_status: "open",
                 category: registered_for,
             },
             populate: ["company", "jaf"]

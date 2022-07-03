@@ -48,7 +48,6 @@ module.exports = {
      * - job is eligible for student's course
      * - job category matches student's registerd_for category, eg. Internship/FTE
      * - job is approved by admin
-     * - job status is open
      * - job start datetime is less than current datetime
      * - job last datetime is greater than current datetime
      * - job is not already applied by student
@@ -82,10 +81,13 @@ module.exports = {
                 return false /* Job has not yet been approved */;
             }
 
-            if (job.job_status != "open") {
-                debug_reason("Job not open");
-                return false /* Job is not open for applications */;
-            }
+            /*
+             * This should be checked before calling this function
+                if (job.job_status != "open") {
+                    debug_reason("Job not open");
+                    return false;
+                }
+            */
         }
 
         {
