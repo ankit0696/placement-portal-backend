@@ -83,7 +83,7 @@ module.exports = {
 
                 return await helper_is_job_eligible(student_self, job, selected_applications);
             })
-        ));
+        );
 
         eligible_jobs = eligible_jobs.filter((_, index) => is_eligible[index]);
 
