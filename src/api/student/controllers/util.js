@@ -18,6 +18,8 @@ module.exports = {
      * - Array of applications, for which "the current student" has already been selected
      * 
      * @notes
+     * - IMPORTANT NOTE: Must check for job_status before calling this function
+     *   This is because admin requires that this returns true even if job_status:closed
      * - All parameters are mandatory
      * - Some fields in student collection are relations, so they need to be populated,
      *   eg. student.course

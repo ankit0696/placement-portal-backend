@@ -14,6 +14,7 @@ module.exports = {
      * - student record with roll number exists
      * - student is approved by admin
      * - student is eligible for job (see `helper_is_job_eligible`)
+     * - job.job_status is "open"
      *
      * @returns Array of job objects, each object containing detail for one job
      */
@@ -74,7 +75,14 @@ module.exports = {
          * @ref: https://advancedweb.hu/how-to-use-async-functions-with-array-filter-in-javascript/
          */
         const is_eligible = await Promise.all(eligible_jobs.map(
-            async (job) => (await helper_is_job_eligible(student_self, job, selected_applications))
+            async (job) => {
+                if ( job.job_status !== "open" ) {
+                    // console.debug("Job not open");
+                    return false /* Job is not open for applications */;
+                }
+
+                return await helper_is_job_eligible(student_self, job, selected_applications);
+            })
         ));
 
         eligible_jobs = eligible_jobs.filter((_, index) => is_eligible[index]);

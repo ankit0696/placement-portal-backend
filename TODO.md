@@ -57,6 +57,7 @@
 * [Done] Remove login_plus_role, register_plus_role
 * [Done] There are two get applications for student: applications.findMe, job.get_applied_jobs. Removed applications.findMe
 * [Done] Zip of multiple resumes
-* Resume must be in pdf. aisa koi rule ?
+* [Done] Resume must be in pdf. aisa koi rule ?
 * Resume upload
-* Eligibility
+* [Done] Eligibility
+* [Done] Admin should get all eligible but not applied jobs, irrespective of job_status
