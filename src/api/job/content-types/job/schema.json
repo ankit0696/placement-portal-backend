@@ -105,6 +105,11 @@
     "eligible_courses": {
       "type": "string",
       "required": true
+    },
+    "only_for_female": {
+      "type": "boolean",
+      "default": false,
+      "required": true
     }
   }
 }

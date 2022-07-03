@@ -53,6 +53,7 @@ module.exports = {
      * - job is not already applied by student
      * - If job.only_for_ews, then only EWS students are eligible
      * - If job.only_for_pwd, then only PWD students are eligible
+     * - If job.only_for_female, then only Female students are eligible
      * - If already selected in an "Internship" then ineligible for other "Internships"
      *
      * More conditions for "FTE" Jobs based on past applications:
@@ -125,7 +126,14 @@ module.exports = {
                     return false /* Job only for PWD */;
                 }
             }
-        }
+
+            if(job.only_for_female) {
+                if(student.gender != "female") {
+                    debug_reason("Job only for Female");
+                    return false /* Job only for Female */;
+                }
+            }
+       }
 
         {
             // Filter based on job.eligible_courses
