@@ -60,13 +60,15 @@ module.exports = {
      * - 3. If selected in A2, then 3 more A1 applications allowed, AFTER selected in A2
      * - 4. If student receives 2 offers, not eligible for more applications
      *
+     * Note: The above checks will also include considering the "placed_status" in student
+     *
      * @returns {boolean} If the student is eligible, this will return true
      */
     async helper_is_job_eligible(student, job, selected_applications) {
         // Instead of silently returning false, I am throwing an error, this may
         // cause some 500s initially, but will likely reduce silent eligibility
         // bugs in the long run
-        const { id, X_marks, XII_marks, cpi, registered_for, course } = student;
+        const { id, X_marks, XII_marks, cpi, registered_for, course, placed_status } = student;
         if (!id || !X_marks || !XII_marks || !cpi || !registered_for || !course ) {
             throw `Some mandatory parameters not passed, or are null: ${student, job}`;
         }
@@ -205,10 +207,11 @@ module.exports = {
                 if (date_A2_selection) {
                     return Date.parse(application.createdAt) > date_A2_selection;
                 }
-                return true;
+                // returning false by default, since this application is BEFORE selection in A2, not new (after)
+                return false;
             }).length;
 
-            const already_selected_A1 = (
+            const already_selected_A1 = placed_status === "placed_A1" || (
                 selected_applications
                     .find(appl => appl.job.classification === "A1") !== undefined
             );
@@ -225,7 +228,7 @@ module.exports = {
             }
 
             // Ensure condition 3 in "More conditions".
-            if (first_A2_application != null) {
+            if (first_A2_application != null || placed_status === "placed_A2") {
                 // If selected in A2 already, then other A2 jobs not eligible now
                 if (job.classification === "A2") {
                     debug_reason("Student already selected in an A2 job");
