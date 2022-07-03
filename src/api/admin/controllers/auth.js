@@ -2,7 +2,7 @@
  *
  * Reference for this: https://gist.github.com/bibekgupta3333/7c4d4ec259045d7089c36b5ae0c4e763#file-strapi_v4_user_register_override-js
  *
- * Modified to also return the role of user who logged in
+ * Modified to take role of user to register
  */
 'use strict';
 
@@ -42,6 +42,11 @@ function issueJWT(payload, jwtOptions = {}) {
     strapi.config.get('plugin.users-permissions.jwtSecret'),
     jwtOptions
   );
+};
+
+// @adig Reference: node_modules/@strapi/plugin-users-permissions/server/utils/index.js
+const getService = name => {
+  return strapi.plugin('users-permissions').service(name);
 };
 
 module.exports = {
@@ -138,9 +143,15 @@ module.exports = {
       }
 
       // NOTE: @adig: Adding "populate: role" here
-      const user = await strapi
-        .query('plugin::users-permissions.user')
-        .create({ data: params, populate: ["role"] });
+     const user = await getService('user').add(params);
+      /*
+       * The below creates the user, but password won't match
+       * const user = await strapi
+       * .query('plugin::users-permissions.user')
+       * .create({ data: params, populate: ["role"] });
+       */
+
+      console.debug({ user });
 
       const sanitizedUser = await sanitizeUser(user, ctx);
       // console.log('User Data', user);
@@ -173,3 +184,5 @@ module.exports = {
     }
   }
 };
+
+// ex: shiftwidth=2 expandtab:
