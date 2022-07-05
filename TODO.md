@@ -61,3 +61,5 @@
 * Resume upload
 * [Done] Eligibility
 * [Done] Admin should get all eligible but not applied jobs, irrespective of job_status
+* resume is MUST before applying
+* resume, jaf, forgot password

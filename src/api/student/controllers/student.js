@@ -206,6 +206,15 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     const files_to_upload = {};
     for (const field in (ctx.request.files || {})) {
       if (media_fields.includes(field)) {
+        // Delete "resume" field in student. ie. by setting resume: null
+        const edited_student = await strapi.db.query("api::student.student").update({
+          where: { id: id },
+          data: {
+            [field]: null
+          }
+        });
+        // console.debug(edited_student);
+
         // Rename the file as `resume.pdf`
         if(field == "resume") {
           ctx.request.files[field].name = `${roll}.pdf`;
