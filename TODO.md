@@ -61,5 +61,7 @@
 * Resume upload
 * [Done] Eligibility
 * [Done] Admin should get all eligible but not applied jobs, irrespective of job_status
-* resume is MUST before applying
-* resume, jaf, forgot password
+* [Done] resume is MUST before applying
+* [Done] jaf
+* forgot password
+* Should coordinator be allowed to edit JAF multiple times ? ie. if JAF already exist whether to allow changing the JAF ?

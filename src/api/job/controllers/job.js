@@ -19,6 +19,8 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
    * Requires request body is same as if passed to POST request to usual create entry through strapi REST api
    * ie. ctx.request.body should be like: { data: { 'company':1, 'job_title': 'Embedded Engineer', ... } }
    *
+   * @note To update JAF, use the /api/job/upload-jaf
+   *
    * Using this route ensures some pre-save checks
    * - the company has been approved
    * - approval_status MUST be set to "pending" initially
@@ -46,6 +48,56 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
 
     return await this.create(ctx);
   },
+
+  /**
+   * @description Update/Upload JAF for a particular job
+   *
+   * @route PUT /api/job/upload-jaf?jobId=2
+   *
+   * @request_body: should be a FormData, with only one key: "jaf", eg. ctx.request.body = { jaf: File }
+   *
+   * @auth Requires coordinator, or admin role to access
+   **/
+  async upload_jaf(ctx) {
+    const query = ctx.request.query;
+
+    if (!query || !(query.jobId)) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Required jobId in query" }] }]);
+    }
+
+    const { jaf } = ctx.request.files;
+
+    if (!jaf) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Required \"jaf\" in body" }] }]);
+    }
+
+    const job = await strapi.db.query("api::job.job").findOne({
+      where: {
+        id: query.jobId,
+      },
+      populate: ["jaf"]
+    });
+     
+    if (!job) {
+      return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
+    }
+
+    // TODO: if (jaf != null), should coordinator be allowed to change it ?
+
+    // Step 1: Delete old "jaf". ie. by setting jaf: null
+    const edited_job = await strapi.db.query("api::job.job").update({
+      where: { id: id },
+      data: {
+        jaf: null
+      }
+    });
+
+    // Step 2: Continue with updating "jaf", by setting ctx parameters according to input this.update takes ?
+    ctx.params["id"] = jobId;
+    ctx.request.body = { data: "{}" };
+    ctx.request.files = { "files.jaf": jaf };
+    return this.update(ctx);
+  }
 }));
 
 // ex: shiftwidth=2 expandtab:
