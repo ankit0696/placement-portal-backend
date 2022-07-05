@@ -92,6 +92,10 @@ module.exports = {
 
     /**
  * @description Searches all jobs according to registered_for current student
+ *
+ * @notes
+ * - Both RESUME & RESUME_LINK must be NOT null
+ *
  * @returns Array of job objects, each object containing detail for one job
  */
     async get_all_jobs(ctx) {
@@ -104,16 +108,21 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            select: ["approved", "registered_for"]
+            populate: ["resume"]
+            // select: ["approved", "registered_for", "resume", "resume_link"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { approved, registered_for } = student_self;
+        const { approved, registered_for, resume, resume_link } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        if (resume == null || resume_link == null) {
+            return ctx.badRequest(null, [{ messages: [{ id: "Resume/Resume_Link not set" }] }]);
         }
 
         const all_jobs = await strapi.db.query("api::job.job").findMany({
