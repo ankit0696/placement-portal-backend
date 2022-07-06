@@ -54,7 +54,13 @@ const getService = name => {
 };
 
 module.exports = {
-  //   Register controller override
+  /**
+   * @description Sign Up/Register route for student
+   *
+   * @auth Accessible by Public/Everyone
+   *
+   * @note- The request body is expected to be exactly SAME as if passed to /api/auth/local
+   */
   register_student: async (ctx) => {
     const pluginStore = strapi.store({
       type: 'plugin',
