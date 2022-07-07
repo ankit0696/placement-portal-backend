@@ -43,6 +43,16 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
     // Ensure, sender did not sender with "approval_status: approved"
     data["approval_status"] = "pending";
 
+    // Ensure job.eligible_courses is existing
+    data.eligible_courses = data.eligible_courses || "";
+
+    // Ensure job.eligible_courses is a comma-separated string of numbers (representing course ids)
+    data.eligible_courses.split(",").forEach(course => {
+      if (course == null || isNaN(course)) {
+        return ctx.badRequest(null, [{ messages: [{ id: "job.eligible_courses is not an array of numbers/Failed to parse" }] }]);
+      }
+    });
+
     // NOTE: this may not be required, since we already modified ctx.request.body.data above
     ctx.request.body = { data };
 
