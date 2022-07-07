@@ -108,21 +108,16 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            populate: ["resume"]
-            // select: ["approved", "registered_for", "resume", "resume_link"]
+            select: ["approved", "registered_for"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
         }
 
-        const { approved, registered_for, resume, resume_link } = student_self;
+        const { approved, registered_for } = student_self;
 
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
-        }
-
-        if (resume == null || resume_link == null) {
-            return ctx.badRequest(null, [{ messages: [{ id: "Resume/Resume_Link not set" }] }]);
         }
 
         const all_jobs = await strapi.db.query("api::job.job").findMany({
@@ -159,7 +154,7 @@ module.exports = {
             where: {
                 roll: user.username,
             },
-            populate: ["program", "course", "department"]
+            populate: ["program", "course", "department", "resume"]
         });
         if (!student_self) {
             return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
@@ -168,9 +163,13 @@ module.exports = {
         // NOTE: The "id" here maybe different than user.id,
         // since that refers to id in Users collection, 
         // and this is in the Students collection
-        const { id, approved } = student_self;
+        const { id, approved, resume, resume_link } = student_self;
         if (approved !== "approved") {
             return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+        }
+
+        if (resume == null || resume_link == null) {
+            return ctx.badRequest(null, [{ messages: [{ id: "Resume/Resume_Link not set" }] }]);
         }
 
         const job = await strapi.db.query("api::job.job").findOne({
@@ -192,8 +191,6 @@ module.exports = {
             },
             populate: ["job"]
         });
-
-
 
         const is_eligible = await helper_is_job_eligible(student_self, job, selected_applications);
         if (!is_eligible) {
