@@ -197,6 +197,11 @@
       ],
       "required": true,
       "default": "unplaced"
+    },
+    "password_change_requested": {
+      "type": "boolean",
+      "default": false,
+      "required": true
     }
   }
 }

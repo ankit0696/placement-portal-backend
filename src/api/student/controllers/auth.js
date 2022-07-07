@@ -184,6 +184,43 @@ module.exports = {
         throw new ApplicationError('Some error occurred (maybe Email is already taken)');
       }
     }
+  },
+
+  /**
+   * @description "Forgot Password"/"Request for password change" route for student
+   * @auth Accessible by Public/Everyone
+   *
+   * @example POST /api/student/request-password-change?roll=<roll number>
+   */
+  async request_password_change(ctx) {
+    const query = ctx.request.query;
+
+    if (!query || !query.roll) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Required roll in query" }] }]);
+    }
+
+    const roll = query.roll;
+
+    const student = await strapi.db.query("api::student.student").findOne({
+      where: { roll: roll },
+      select: ["id"]
+    });
+
+    if (!student) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Student not found" }] }]);
+    }
+
+    // update student's password_change_requested field to true
+    const updated = await strapi.db.query("api::student.student").update({
+      where: { id: student.id },
+      data: { password_change_requested: true }
+    });
+
+    if (!updated) {
+      return ctx.internalServerError(null, [{ messages: [{ id: "Error updating student" }] }]);
+    }
+
+    return ctx.send("Password change request sent");
   }
 };
 

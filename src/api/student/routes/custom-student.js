@@ -52,6 +52,15 @@ module.exports = {
         prefix: '',
       },
     },
+    {
+      method: 'PUT',
+      path: '/student/request-password-change',
+      handler: 'auth.request_password_change',
+      config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
+    },
   ],
 };
 
