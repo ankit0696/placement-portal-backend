@@ -52,7 +52,7 @@ module.exports = {
     // @note: .validatePassword is defined in
     // `node_modules/@strapi/plugin-users-permissions/server/services/user.js`
     if (!(await strapi.service('plugin::users-permissions.user').validatePassword(old_pass, currentHashedPassword))) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Current/Old password is wrong" }] }]);
+      return ctx.forbidden(null, [{ messages: [{ id: "Current/Old password is wrong" }] }]);
     }
 
     // Update the user's password.
