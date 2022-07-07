@@ -64,11 +64,35 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
    *
    * @route PUT /api/job/upload-jaf?jobId=2
    *
+   * @note coordinator can only upload the jaf once, irrespective of job's approval_status
+   * @note admin can change the jaf any number of times
+   *
    * @request_body: should be a FormData, with only one key: "jaf", eg. ctx.request.body = { jaf: File }
    *
    * @auth Requires coordinator, or admin role to access
    **/
   async upload_jaf(ctx) {
+    const user = ctx.state.user;
+    
+    if (!user) {
+      return ctx.unauthorized(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
+    }
+     
+    const role = await strapi.query("plugin::users-permissions.user").findOne({
+      where: { username: user.username },
+      populate: ["role"],
+    });
+
+    if (!role) {
+      return ctx.internalServerError(null, [{ messages: [{ id: `Failed to find user role: ${user.username}` }] }]);
+    }
+
+    const role_type = role.role.type;
+
+    if (role_type != "coordinator" && role_type != "admin") {
+      return ctx.unauthorized(null, [{ messages: [{ id: "You are not authorized to upload JAF" }] }]);
+    }
+
     const query = ctx.request.query;
 
     if (!query || !(query.jobId)) {
@@ -92,7 +116,10 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "No such job Id found" }] }]);
     }
 
-    // TODO: if (jaf != null), should coordinator be allowed to change it ?
+    // if (jaf != null), coordinator should NOT be allowed to change it
+    if (role_type === "coordinator" && job.jaf) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Coordinators can not change the uploaded JAF" }] }]);
+    }
 
     // Step 1: Delete old "jaf". ie. by setting jaf: null
     const edited_job = await strapi.db.query("api::job.job").update({
