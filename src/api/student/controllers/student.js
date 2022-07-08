@@ -161,8 +161,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     ];
 
     // Fields related to SPI and CPI, only allowed to be changed if Admin globally allows change to these
-    // NOTE: current_sem can also only be changed if CPI change allowed
-    const cpi_spi_fields = ["current_sem", "spi1", "spi2", "spi3", "spi4", "spi5", "spi6", "spi7", "spi8", "cpi"];
+    const cpi_spi_fields = ["spi_1", "spi_2", "spi_3", "spi_4", "spi_5", "spi_6", "spi_7", "spi_8", "cpi"];
 
     // NOTE: ALL other fields (including invalid/unknown) are removed, and treated as immutable
     // for changing password, use forgot password
@@ -191,7 +190,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     // If allowed, allow fields given in `cpi_spi_fields` array to be modified
     if (setting["cpi_change_allowed"] == true) {
       for(const field in body) {
-        if( cpi_spi_fields.includes(field) ) {
+        // @check body[field] must be a number, else it is simply skipped
+        if( cpi_spi_fields.includes(field) && body[field] && !isNan(body[field]) ) {
           fields_to_modify[field] = body[field];
         }
       }

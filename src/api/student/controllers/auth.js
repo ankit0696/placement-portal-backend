@@ -222,7 +222,7 @@ module.exports = {
       return ctx.internalServerError(null, [{ messages: [{ id: "Error updating student" }] }]);
     }
 
-    return ctx.send("Password change request sent");
+    return ctx.body = { message: "Password change request sent" };
   }
 };
 
