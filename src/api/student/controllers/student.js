@@ -147,6 +147,8 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
      */
     // Most mandatory components locked after approval of the profile (ie. only allowed to change before approval).
     // CPI can be updated when allowed by admin
+
+    // NOTE: These are not allowed to change, since student has already "submitted for approval"
     const fields_allowed_before_approval = [
       "name", "roll", "gender", "date_of_birth", "category", "rank", "registered_for",
       "course", "address", "X_marks", "XII_marks",
@@ -155,11 +157,12 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // should include at least ALL optional fields
     const fields_allowed_anytime = [
-      "resume_link", "other_achievements", "projects", "profile_picture", "current_sem"
+      "resume_link", "other_achievements", "projects"
     ];
 
     // Fields related to SPI and CPI, only allowed to be changed if Admin globally allows change to these
-    const cpi_spi_fields = ["spi1", "spi2", "spi3", "spi4", "spi5", "spi6", "spi7", "spi8", "cpi"];
+    // NOTE: current_sem can also only be changed if CPI change allowed
+    const cpi_spi_fields = ["current_sem", "spi1", "spi2", "spi3", "spi4", "spi5", "spi6", "spi7", "spi8", "cpi"];
 
     // NOTE: ALL other fields (including invalid/unknown) are removed, and treated as immutable
     // for changing password, use forgot password
