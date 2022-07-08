@@ -8,9 +8,7 @@ const { createCoreController } = require("@strapi/strapi").factories;
 
 module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   /* Accessible only with proper bearer token 
-     Idea is to first, create a request, and then set "approved": "pending",
   */
-
   async findMe(ctx) {
     const user = ctx.state.user;
 
@@ -130,7 +128,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {
         roll: roll,
       },
-      select: ["id", "approved"/*, "activated"*/]
+      select: ["id", "approved"]
     });
     if (!student_data) {
       // Returning 500, since this should not fail, it's just reading data of an existing user (as they have been provided the JWT)
@@ -169,8 +167,12 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     const fields_to_modify = {};
     for (const field in body) {
       // These fields will only be added to `fields_to_modify` if account is not already approved/rejected
-      if (fields_allowed_before_approval.includes(field) == true) {
-        continue; // skip modifying fields that are not allowed after "Submit for approval"
+      if (fields_allowed_before_approval.includes(field)) {
+        if (approved === "pending") {
+          fields_to_modify[field] = body[field];
+        } else {
+          continue; // skip modifying fields that are not allowed after "Submit for approval"
+        }
       }
       else if (fields_allowed_anytime.includes(field)) {
         fields_to_modify[field] = body[field];
