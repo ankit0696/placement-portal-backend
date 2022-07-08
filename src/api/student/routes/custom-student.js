@@ -53,7 +53,7 @@ module.exports = {
       },
     },
     {
-      method: 'PUT',
+      method: 'POST',
       path: '/student/request-password-change',
       handler: 'auth.request_password_change',
       config: {

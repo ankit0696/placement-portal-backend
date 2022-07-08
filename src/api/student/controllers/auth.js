@@ -190,24 +190,26 @@ module.exports = {
    * @description "Forgot Password"/"Request for password change" route for student
    * @auth Accessible by Public/Everyone
    *
-   * @example POST /api/student/request-password-change?roll=<roll number>
+   * @example POST /api/student/request-password-change
+   *
+   * @body { institute_email_id: string, roll: string }
+   *
+   * @note Just taking both email and roll, to prevent anyone from creating too many requests for other roll numbers
    */
   async request_password_change(ctx) {
-    const query = ctx.request.query;
+    const { institute_email_id, roll } = ctx.request.body;
 
-    if (!query || !query.roll) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Required roll in query" }] }]);
+    if (!institute_email_id || !roll) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Required roll and email" }] }]);
     }
 
-    const roll = query.roll;
-
     const student = await strapi.db.query("api::student.student").findOne({
-      where: { roll: roll },
+      where: { roll: roll, institute_email_id: institute_email_id },
       select: ["id"]
     });
 
     if (!student) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Student not found" }] }]);
+      return ctx.badRequest(null, [{ messages: [{ id: "Student not found/Roll and Email don't match" }] }]);
     }
 
     // update student's password_change_requested field to true
