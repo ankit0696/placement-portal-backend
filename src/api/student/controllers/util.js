@@ -287,13 +287,13 @@ module.exports = {
             select: ["id", "approved"]
         });
         if (!student_self) {
-            return ctx.badRequest(null, [{ messages: [{ id: "No student found" }] }]);
+            return []; // "No student found"
         }
 
         const { id, approved } = student_self;
 
         if (approved !== "approved") {
-            return ctx.badRequest(null, [{ messages: [{ id: "Account not approved yet" }] }]);
+            return []; // "Student not approved"
         }
 
         const applied_jobs = await strapi.db.query("api::application.application").findMany({

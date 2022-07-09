@@ -193,7 +193,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     if (setting["cpi_change_allowed"] == true) {
       for(const field in body) {
         // @check body[field] must be a number, else it is simply skipped
-        if( cpi_spi_fields.includes(field) && body[field] && !isNan(body[field]) ) {
+        if( cpi_spi_fields.includes(field) && body[field] && !isNaN(body[field]) ) {
           fields_to_modify[field] = body[field];
         }
       }
