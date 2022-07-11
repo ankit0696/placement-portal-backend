@@ -16,17 +16,17 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
    * @auth Authentication is needed for this. Only user with access >='coordinator' role should be granted permission
    *
    * @request
-   * Requires request body is same as if passed to POST request to usual create entry through strapi REST api
-   * ie. ctx.request.body should be like: { data: { 'company':1, 'job_title': 'Embedded Engineer', ... } }
+   * Requires request body is formdata containing the respective keys: value, and possibly a file in 'jaf' key
+   * ie. ctx.request.body should be like: { 'company':1, 'job_title': 'Embedded Engineer', ..., 'jaf': <file> }
    *
-   * @note To update JAF, use the /api/job/upload-jaf
+   * @note To update JAF later, use the /api/job/upload-jaf
    *
    * Using this route ensures some pre-save checks
    * - the company has been approved
    * - approval_status MUST be set to "pending" initially
    */
   async register(ctx) {
-    const { data } = ctx.request.body;
+    const data = ctx.request.body;
 
     if (!data) {
       return ctx.badRequest(null, [{ messages: [{ id: "Invalid parameters/Failed to parse" }] }]);
@@ -52,6 +52,12 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
         return ctx.badRequest(null, [{ messages: [{ id: "job.eligible_courses is not an array of numbers/Failed to parse" }] }]);
       }
     });
+
+    // If job.jaf is provided, pass it too (this.create expects the key to be files.jaf)
+    const { jaf } = ctx.request.files;
+    if (jaf) {
+      ctx.request.files = { "files.jaf": jaf };
+    }
 
     // NOTE: this may not be required, since we already modified ctx.request.body.data above
     ctx.request.body = { data };
