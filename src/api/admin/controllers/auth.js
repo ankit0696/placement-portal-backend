@@ -177,7 +177,7 @@ module.exports = {
         throw new ApplicationError('Username already taken');
       } else {
         console.error(err);
-        throw new ApplicationError('Some error occurred (maybe Email is already taken)');
+        throw new ApplicationError('Some error occurred (maybe Roll/Email is already taken)');
       }
     }
   }
