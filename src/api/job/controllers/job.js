@@ -54,7 +54,7 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
     });
 
     // If job.jaf is provided, pass it too (this.create expects the key to be files.jaf)
-    const { jaf } = ctx.request.files;
+    const { jaf } = ctx.request.files || {};
     if (jaf) {
       ctx.request.files = { "files.jaf": jaf };
     }
@@ -105,7 +105,7 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
       return ctx.badRequest(null, [{ messages: [{ id: "Required jobId in query" }] }]);
     }
 
-    const { jaf } = ctx.request.files;
+    const { jaf } = ctx.request.files || {};
 
     if (!jaf) {
       return ctx.badRequest(null, [{ messages: [{ id: "Required \"jaf\" in body" }] }]);
