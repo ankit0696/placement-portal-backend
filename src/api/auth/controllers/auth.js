@@ -64,6 +64,46 @@ module.exports = {
     });
 
     return edited_user;
+  },
+
+  /**
+   * @description Returns 'User' id, based on username
+   * 
+   * @auth Only for admin
+   *
+   * @param username
+   *
+   * @example GET /api/auth/userid?username=<username>
+   */
+  get_userid: async (ctx) => {
+    const user = ctx.state.user;
+
+    if (!user) {
+      return ctx.unauthorized(null, [{ messages: [{ id: "Bearer Token not provided or invalid" }] }]);
+    }
+
+    if (user.role !== 'admin') {
+      return ctx.forbidden(null, [{ messages: [{ id: "You are not authorized to perform this action" }] }]);
+    }
+
+    const { username } = ctx.query;
+
+    if (!username) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Username not provided" }] }]);
+    }
+
+    const user_obj = await strapi.query('plugin::users-permissions.user').findOne({
+      where: { username },
+      select: ["id"]
+    });
+
+    if (!user_obj) {
+      return ctx.badRequest(null, [{ messages: [{ id: "User not found" }] }]);
+    }
+
+    const userid = user_obj.id;
+
+    return { id: userid };
   }
 };
 
