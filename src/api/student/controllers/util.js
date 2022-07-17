@@ -210,7 +210,7 @@ module.exports = {
             // console.debug({ selected_applications });
 
             // Date at which student was first selected in A2 (if any)
-            const first_A2_application = selected_applications.find(appl => appl.job.category === "A2") || null;
+            const first_A2_application = selected_applications.find(appl => appl.job.classification === "A2") || null;
             const date_A2_selection = first_A2_application ? Date.parse(first_A2_application.created_at) : null;
 
             // Number of applications to A1 jobs created by student, AFTER being selected in an A2 job
