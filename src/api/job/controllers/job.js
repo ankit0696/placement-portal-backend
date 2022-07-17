@@ -129,14 +129,14 @@ module.exports = createCoreController("api::job.job", ({ strapi }) => ({
 
     // Step 1: Delete old "jaf". ie. by setting jaf: null
     const edited_job = await strapi.db.query("api::job.job").update({
-      where: { id: id },
+      where: { id: query.jobId },
       data: {
         jaf: null
       }
     });
 
     // Step 2: Continue with updating "jaf", by setting ctx parameters according to input this.update takes ?
-    ctx.params["id"] = jobId;
+    ctx.params["id"] = query.jobId;
     ctx.request.body = { data: "{}" };
     ctx.request.files = { "files.jaf": jaf };
     return this.update(ctx);
