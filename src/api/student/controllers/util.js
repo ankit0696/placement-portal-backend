@@ -228,7 +228,7 @@ module.exports = {
                 return false;
             }).length;
 
-            const already_selected_A1 = placed_status === "placed_A1" || (
+            const already_selected_A1 = placed_status === "placed_a1" || (
                 selected_applications
                     .find(appl => appl.job.classification === "A1") !== undefined
             );
@@ -245,7 +245,7 @@ module.exports = {
             }
 
             // Ensure condition 3 in "More conditions".
-            if (first_A2_application != null || placed_status === "placed_A2") {
+            if (first_A2_application != null || placed_status === "placed_a2") {
                 // If selected in A2 already, then other A2 jobs not eligible now
                 if (job.classification === "A2") {
                     debug_reason("Student already selected in an A2 job");

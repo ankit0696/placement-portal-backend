@@ -155,7 +155,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     // should include at least ALL optional fields
     const fields_allowed_anytime = [
-      "resume_link", "other_achievements", "projects"
+      "resume_link", "other_achievements", "projects", "transcript_link"
     ];
 
     // Fields related to SPI and CPI, only allowed to be changed if Admin globally allows change to these
