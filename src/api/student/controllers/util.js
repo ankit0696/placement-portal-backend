@@ -58,7 +58,7 @@ module.exports = {
      *
      * More conditions for "FTE" Jobs based on past applications:
      * - 1. If job.classification is "X", then the 'below' 3 conditions will be null and void
-     * - 2. If selected in A1 => out of placement, not eligible
+     * - 2. If selected in X or A1 => out of placement, not eligible (clarification: any number of times, because the below conditions don't apply)
      * - 3. If selected in A2, then 3 more A1 applications allowed, AFTER selected in A2
      * - 4. If student receives 2 offers, not eligible for more applications
      *
@@ -233,14 +233,19 @@ module.exports = {
                     .find(appl => appl.job.classification === "A1") !== undefined
             );
 
+            const already_selected_X = placed_status === "placed_x" || (
+                selected_applications
+                    .find(appl => appl.job.classification === "X") !== undefined
+            );
+
             // Ensure condition 1 in "More conditions"
             if (job.classification === "X") {
                 return true;
             }
 
             // Ensure condition 2 in "More conditions"
-            if (already_selected_A1) {
-                debug_reason("Student already selected in an A1 job");
+            if (already_selected_A1 || already_selected_X) {
+                debug_reason("Student already selected in an A1 or X job");
                 return false;
             }
 

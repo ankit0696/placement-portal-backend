@@ -193,7 +193,8 @@
       "enum": [
         "unplaced",
         "placed_a1",
-        "placed_a2"
+        "placed_a2",
+        "placed_x"
       ],
       "required": true,
       "default": "unplaced"
@@ -203,7 +204,7 @@
       "default": false,
       "required": true
     },
-        "transcript_link": {
+    "transcript_link": {
       "type": "string"
     }
   }
