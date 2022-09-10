@@ -202,8 +202,13 @@ module.exports = {
 
         if ( job.category == "FTE" ) {
             if ( job.classification == "none" ) {
-                debug_reason("Job is invalid: FTE job has classification none");
-                return false /* Job is invalid: FTE job has classification none */;
+                const existing_internship_selection = selected_applications
+                    .find(appl => appl.job.classication == "none");
+
+                if (existing_internship_selection) {
+                    debug_reason("Student already selected in an Internship");
+                    return false /* Already selected in an Internship */;
+                }
             }
 
             // Check the extra conditions, based on already selected applications
