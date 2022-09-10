@@ -70,7 +70,7 @@ module.exports = {
         // Instead of silently returning false, I am throwing an error, this may
         // cause some 500s initially, but will likely reduce silent eligibility
         // bugs in the long run
-        const { id, X_marks, XII_marks, cpi, registered_for, course, placed_status } = student;
+        const { id, X_marks, XII_marks, cpi, registered_for, course, placed_status, internship_status } = student;
         if (!id || !X_marks || !XII_marks || !cpi || !registered_for || !course ) {
             throw `Some mandatory parameters not passed, or are null: ${student, job}`;
         }
@@ -194,7 +194,7 @@ module.exports = {
             const existing_internship_selection = selected_applications
                 .find(appl => appl.job.category == "Internship");
 
-            if (existing_internship_selection) {
+            if (existing_internship_selection || (internship_status === true)) {
                 debug_reason("Student already selected in an Internship");
                 return false /* Already selected in an Internship */;
             }
@@ -203,9 +203,9 @@ module.exports = {
         if ( job.category == "FTE" ) {
             if ( job.classification == "none" ) {
                 const existing_internship_selection = selected_applications
-                    .find(appl => appl.job.classication == "none");
+                    .find(appl => (appl.job.category == "FTE" && appl.job.classication == "none"));
 
-                if (existing_internship_selection) {
+                if (existing_internship_selection || (internship_status === true)) {
                     debug_reason("Student already selected in an Internship");
                     return false /* Already selected in an Internship */;
                 }

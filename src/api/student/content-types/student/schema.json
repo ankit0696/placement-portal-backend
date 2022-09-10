@@ -206,6 +206,11 @@
     },
     "transcript_link": {
       "type": "string"
+    },
+    "internship_status": {
+      "type": "boolean",
+      "default": false,
+      "required": false
     }
   }
 }
