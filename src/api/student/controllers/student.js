@@ -263,14 +263,14 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
   /**
    * @description Returns whether a student is placed or not
-   * @example http://localhost:1337/student/placed_status?roll=19cs11
+   * @example http://localhost:1337/student/placed-status?roll=19cs11
    *
    * @note Conditions for being 'placed':
    * 1. On-campus selection: Logic is any application has status='selected',
    * but only category='FTE' AND classication is not 'none', since
    * classification 'none' is for internships
    * 2. Off-campus selection: Logic is the placed_status field in the student's
-   * data is set
+   * data is set to something other than 'unplaced'
    *
    * @returns { placed: true } if placed, { placed: false } otherwise
    */
@@ -292,6 +292,12 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
     }
 
+    // If placed_status already set, no need to query the applications, return
+    if (student.placed_status != 'unplaced') {
+      ctx.body = { placed: true };
+      return;
+    }
+
     const selected_application = await strapi.db.query('api::application.application').findOne({
       where: {
         student: student.id,
@@ -306,14 +312,75 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       }
     });
 
-    const { placed_status } = student;
-
-    if (placed_status || selected_application) {
+    if (selected_application) {
       ctx.body = { placed: true };
     } else {
       ctx.body = { placed: false };
     }
+  },
+
+  /**
+   * @description Returns whether a student has an intern offer or not
+   * @example http://localhost:1337/student/intern-status?roll=19cs11
+   *
+   * @note Conditions for having an 'intern offer':
+   * 1. On-campus selection: Logic is any application has status='selected',
+   * and either (category='FTE' AND classication='none') or (category='Intern')
+   * 2. Off-campus selection: Logic is the intern_status field in the student's
+   * data is set
+   *
+   * @returns { internship: true } if got internship, else {internship: false}
+   */
+  async get_intern_status(ctx) {
+    const query = ctx.request.query;
+    if (!query || !query.roll) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number" }] }]);
+    }
+
+    const roll = query.roll;
+
+    const student = await strapi.db.query('api::student.student').findOne({
+      where: {
+        roll: roll
+      },
+      select: ['internship_status']
+    });
+    if (!student) {
+      return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
+    }
+
+    // If intern selected, no need to query the applications, return
+    if (student.internship_status == true) {
+      ctx.body = { internship: true };
+      return;
+    }
+
+    const selected_application = await strapi.db.query('api::application.application').findOne({
+      where: {
+        student: student.id,
+        status: 'selected',
+        job: {
+          // @ref: OR according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#or
+          $or: [
+            {
+              category: 'FTE',
+              classification: 'none'
+            },
+            {
+              category: 'Internship'
+            }
+          ]
+        }
+      }
+    });
+
+    if (selected_application) {
+      ctx.body = { internship: true };
+    } else {
+      ctx.body = { internship: false };
+    }
   }
+
 }));
 
 // ex: shiftwidth=2 expandtab:
