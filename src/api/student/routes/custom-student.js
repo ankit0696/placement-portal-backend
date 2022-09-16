@@ -61,6 +61,24 @@ module.exports = {
         prefix: '',
       },
     },
+    {
+      method: 'GET',
+      path: '/student/placed-status',
+      handler: 'student.get_placed_status',
+      config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
+    },
+    {
+      method: 'GET',
+      path: '/student/intern-status',
+      handler: 'student.get_intern_status',
+      config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
+    }
   ],
 };
 

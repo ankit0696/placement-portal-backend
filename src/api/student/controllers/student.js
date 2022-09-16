@@ -260,6 +260,60 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       return this.update(ctx);
     }
   },
+
+  /**
+   * @description Returns whether a student is placed or not
+   * @example http://localhost:1337/student/placed_status?roll=19cs11
+   *
+   * @note Conditions for being 'placed':
+   * 1. On-campus selection: Logic is any application has status='selected',
+   * but only category='FTE' AND classication is not 'none', since
+   * classification 'none' is for internships
+   * 2. Off-campus selection: Logic is the placed_status field in the student's
+   * data is set
+   *
+   * @returns { placed: true } if placed, { placed: false } otherwise
+   */
+  async get_placed_status(ctx) {
+    const query = ctx.request.query;
+    if (!query || !query.roll) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number" }] }]);
+    }
+
+    const roll = query.roll;
+
+    const student = await strapi.db.query('api::student.student').findOne({
+      where: {
+        roll: roll
+      },
+      select: ['placed_status']
+    });
+    if (!student) {
+      return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
+    }
+
+    const selected_application = await strapi.db.query('api::application.application').findOne({
+      where: {
+        student: student.id,
+        status: 'selected',
+        job: {
+          category: 'FTE',
+          // @ref: Negation according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#not
+          $not: {
+            classification: 'none'
+          }
+        }
+      }
+    });
+
+    const { placed_status } = student;
+
+    if (placed_status || selected_application) {
+      ctx.body = { placed: true };
+    } else {
+      ctx.body = { placed: false };
+    }
+  }
 }));
 
 // ex: shiftwidth=2 expandtab:
