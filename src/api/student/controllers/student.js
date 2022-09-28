@@ -362,21 +362,65 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * @description Returns whether a student has an intern offer or not
    * @example http://localhost:1337/student/intern-status?roll=19cs11
    *
+   * @note This function doesn't respect 'registered_for', for example, a
+   * student registered for FTE, may also have his roll in the output, in case
+   * he was selected in an intern or internship_status is true.
+   * If needed, handle/filter according to that on frontend
+   *
    * @note Conditions for having an 'intern offer':
    * 1. On-campus selection: Logic is any application has status='selected',
    * and either (category='FTE' AND classication='none') or (category='Intern')
    * 2. Off-campus selection: Logic is the intern_status field in the student's
    * data is set
    *
-   * @returns { internship: true } if got internship, else {internship: false}
+   * @returns { internship: boolean | [ string ] }, If 'roll' given, then returns a
+   * boolean (true/false denoting whether got/no internship respectively). Else,
+   * when 'roll' not given, returns an 'array of strings' representing roll
+   * numbers of students who got internships
    */
   async get_intern_status(ctx) {
-    const query = ctx.request.query;
-    if (!query || !query.roll) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number" }] }]);
-    }
+    const query = ctx.request.query || {};
 
     const roll = query.roll;
+    if (!roll) {
+      // Get all roll numbers where the student is selected in some intern
+      const applications = await strapi.db.query('api::application.application').find({
+        where: {
+          status: 'selected',
+          job: {
+            // @ref: OR according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#or
+            $or: [
+              {
+                category: 'FTE',
+                classification: 'none'
+              },
+              {
+                category: 'Internship'
+              }
+            ]
+          }
+        },
+        populate: ["student"]
+      });
+
+      const oncampus_intern = applications.map(app => app.student.roll);
+
+      // Get array of students who have got an internship
+      const students = await strapi.db.query('api::student.student').find({
+        where: {
+          internship_status: true
+        },
+        select: ["roll"]
+      });
+
+      const offcampus_intern = students.map(student => student["roll"]);
+
+      // merge unique rolls from oncampus_placed and offcampus_placed
+      const intern_rolls = Array.from(new Set([...oncampus_intern, ...offcampus_intern]));
+
+      ctx.body = { internship: intern_rolls };
+      return;
+    }
 
     const student = await strapi.db.query('api::student.student').findOne({
       where: {
