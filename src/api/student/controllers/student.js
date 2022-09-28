@@ -262,8 +262,12 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
   },
 
   /**
-   * @description Returns whether a student is placed or not
+   * @description Returns whether a student is placed or not, if a roll given,
+   * else returns results for all
    * @example http://localhost:1337/student/placed-status?roll=19cs11
+   *          response: { placed: true }
+   * @example http://localhost:1337/student/placed-status,
+   *          response: { placed: ["19cs11", "19ec62"] }
    *
    * @note Conditions for being 'placed':
    * 1. On-campus selection: Logic is any application has status='selected',
@@ -272,15 +276,50 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * 2. Off-campus selection: Logic is the placed_status field in the student's
    * data is set to something other than 'unplaced'
    *
-   * @returns { placed: true } if placed, { placed: false } otherwise
+   * @returns { placed: boolean | [ string ] }, If 'roll' given, then returns a
+   * boolean (true/false denoting whether placed/not placed respectively). Else,
+   * when 'roll' not given, returns an 'array of strings' representing roll
+   * numbers of placed students
    */
   async get_placed_status(ctx) {
-    const query = ctx.request.query;
-    if (!query || !query.roll) {
-      return ctx.badRequest(null, [{ messages: [{ id: "Missing roll number" }] }]);
-    }
+    const query = ctx.request.query || {};
 
     const roll = query.roll;
+
+    if (!roll) {
+      // Get all roll numbers where the student is selected in some job
+      const applications = await strapi.db.query('api::application.application').find({
+        status: 'selected',
+        job: {
+          category: 'FTE',
+          // @ref: Negation according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#not
+          $not: {
+            classification: 'none'
+          }
+        },
+        populate: ["student"]
+      });
+
+      const oncampus_placed = applications.map(app => app.student.roll);
+
+      // Get array of students who are NOT 'unplaced'
+      const students = await strapi.db.query('api::student.student').find({
+        where: {
+          $not: {
+            placed_status: "unplaced"
+          }
+        },
+        select: ["roll"]
+      });
+
+      const offcampus_placed = students.map(student => student["roll"]);
+
+      // merge unique rolls from oncampus_placed and offcampus_placed
+      const placed_rolls = Array.from(new Set([...oncampus_placed, ...offcampus_placed]));
+
+      ctx.body = { placed: placed_rolls };
+      return;
+    }
 
     const student = await strapi.db.query('api::student.student').findOne({
       where: {
