@@ -289,13 +289,15 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     if (!roll) {
       // Get all roll numbers where the student is selected in some job
       const applications = await strapi.db.query('api::application.application').findMany({
-        status: 'selected',
-        job: {
-          category: 'FTE',
-          // @ref: Negation according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#not
-          $not: {
-            classification: 'none'
-          }
+        where: {
+          status: 'selected',
+          job: {
+            category: 'FTE',
+            // @ref: Negation according to https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/query-engine/filtering.html#not
+            $not: {
+              classification: 'none'
+            }
+          },
         },
         populate: ["student"]
       });
@@ -325,7 +327,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {
         roll: roll
       },
-      select: ['placed_status']
+      select: ['id', 'placed_status']
     });
     if (!student) {
       return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
@@ -426,7 +428,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       where: {
         roll: roll
       },
-      select: ['internship_status']
+      select: ['id', 'internship_status']
     });
     if (!student) {
       return ctx.notFound(null, [{ messages: [{ id: "Student not found" }] }]);
