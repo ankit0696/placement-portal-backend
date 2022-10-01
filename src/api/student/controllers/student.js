@@ -288,7 +288,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
 
     if (!roll) {
       // Get all roll numbers where the student is selected in some job
-      const applications = await strapi.db.query('api::application.application').find({
+      const applications = await strapi.db.query('api::application.application').findMany({
         status: 'selected',
         job: {
           category: 'FTE',
@@ -303,7 +303,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       const oncampus_placed = applications.map(app => app.student.roll);
 
       // Get array of students who are NOT 'unplaced'
-      const students = await strapi.db.query('api::student.student').find({
+      const students = await strapi.db.query('api::student.student').findMany({
         where: {
           $not: {
             placed_status: "unplaced"
@@ -384,7 +384,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     const roll = query.roll;
     if (!roll) {
       // Get all roll numbers where the student is selected in some intern
-      const applications = await strapi.db.query('api::application.application').find({
+      const applications = await strapi.db.query('api::application.application').findMany({
         where: {
           status: 'selected',
           job: {
@@ -406,7 +406,7 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
       const oncampus_intern = applications.map(app => app.student.roll);
 
       // Get array of students who have got an internship
-      const students = await strapi.db.query('api::student.student').find({
+      const students = await strapi.db.query('api::student.student').findMany({
         where: {
           internship_status: true
         },
