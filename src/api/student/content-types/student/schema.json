@@ -211,6 +211,10 @@
       "type": "boolean",
       "default": false,
       "required": false
+    },
+    "placed_status_updated": {
+      "type": "datetime",
+      "unique": false
     }
   }
 }

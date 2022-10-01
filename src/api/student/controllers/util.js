@@ -216,7 +216,25 @@ module.exports = {
 
             // Date at which student was first selected in A2 (if any)
             const first_A2_application = selected_applications.find(appl => appl.job.classification === "A2") || null;
-            const date_A2_selection = first_A2_application ? Date.parse(first_A2_application.createdAt) : null;
+
+            // When placed in A2 offcampus, we are using the
+            // "placed_status_updated" field also
+            // NOTE: When Date.parse fails, it returns NaN
+            let offcampus_A2_placed_date = (placed_status === "placed_a2") ? (Date.parse(placed_status_updated) || null) : null;
+
+            let oncampus_A2_placed_date = (first_A2_application) ? (Date.parse(first_A2_application.createdAt)): null;
+
+            let date_A2_selection = null;
+
+            // Taking the first out of both dates
+            if ( oncampus_A2_placed_date && offcampus_A2_placed_date && (offcampus_A2_placed_date < oncampus_A2_placed_date) ) {
+                date_A2_selection = offcampus_A2_placed_date;
+            } else {
+                // Since, either one or both are null, or
+                // oncampus_A2_placed_date is earlier, either way, it has higher
+                // precedence, but if null, use offcampus_A2_placed_date
+                date_A2_selection = oncampus_A2_placed_date || offcampus_A2_placed_date;
+            }
 
             // Number of applications to A1 jobs created by student, AFTER being selected in an A2 job
             // FUTURE: This calculation will get repeated for all jobs, see if it can be optimised

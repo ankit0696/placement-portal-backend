@@ -78,7 +78,14 @@ module.exports = {
         middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
       },
-    }
+    },
+    {
+      method: "PUT",
+      path: "/student/set-placed-status",
+      handler: "student.set_placed_status",
+      policies: []
+    },
+ 
   ],
 };
 

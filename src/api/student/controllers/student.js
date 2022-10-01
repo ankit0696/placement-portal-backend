@@ -464,6 +464,43 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
     } else {
       ctx.body = { internship: false };
     }
+  },
+
+  /**
+   * @description Set 'placed_status' field for a student (usually when they get
+   * placed off-campus).
+   * A separate API was needed to ensure that placed_status and
+   * placed_status_updated are set simulataneously
+   *
+   * @auth admin
+   *
+   * @note Setting to 'unplaced' is also allowed
+   *
+   * @example PUT
+   * http://localhost:1337/student/set-placed-status?roll=19cs11&placed_status=placed_a2
+   */
+  async set_placed_status(ctx) {
+    const query = ctx.request.query;
+
+    if (!query || !query.roll || !query.placed_status) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Roll or placed_status not passed" }] }]);
+    }
+
+    const { roll, placed_status } = query;
+
+    if (["placed_a1", "placed_a2", "placed_x", "unplaced"].includes(placed_status) === false) {
+      return ctx.badRequest(null, [{ messages: [{ id: "Invalid placed_status" }] }]);
+    }
+
+    await strapi.db.query('api::student.student').update({
+      where: { roll: roll },
+      data: {
+        placed_status: placed_status,
+        placed_status_updated: new Date()
+      }
+    });
+
+    ctx.body = { placed_status: placed_status };
   }
 
 }));
