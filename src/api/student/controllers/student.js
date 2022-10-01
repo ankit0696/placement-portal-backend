@@ -267,7 +267,11 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * @example http://localhost:1337/student/placed-status?roll=19cs11
    *          response: { placed: true }
    * @example http://localhost:1337/student/placed-status,
-   *          response: { placed: ["19cs11", "19ec62"] }
+   *          response: { placed: { "placed_a1": ["19cs11", "19ec62"], "placed_a2": [...], "placed_x": [...] } }
+   *
+   * @note This doesn't return 'unplaced' student's rolls
+   * @note There can be the case where student is selected in both A1 and A2, in that case
+   * handle at frontend, which to show A1 or A2
    *
    * @note Conditions for being 'placed':
    * 1. On-campus selection: Logic is any application has status='selected',
@@ -276,10 +280,10 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
    * 2. Off-campus selection: Logic is the placed_status field in the student's
    * data is set to something other than 'unplaced'
    *
-   * @returns { placed: boolean | [ string ] }, If 'roll' given, then returns a
+   * @returns { placed: boolean | [ [placed_status]: string ] }, If 'roll' given, then returns a
    * boolean (true/false denoting whether placed/not placed respectively). Else,
-   * when 'roll' not given, returns an 'array of strings' representing roll
-   * numbers of placed students
+   * when 'roll' not given, returns an 'array of roll' for each placed_status
+   * except 'unplaced'
    */
   async get_placed_status(ctx) {
     const query = ctx.request.query || {};
@@ -299,10 +303,19 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
             }
           },
         },
-        populate: ["student"]
+        populate: ["student", "job"]
       });
 
-      const oncampus_placed = applications.map(app => app.student.roll);
+      const oncampus_placed = {
+        "placed_a1": [],
+        "placed_a2": [],
+        "placed_x": []
+      };
+
+      applications.forEach(app => {
+        // Note: Assuming job.classification is one of "A1", "A2", "X"
+        oncampus_placed[`placed_${app.job.classification.toLowerCase()}`].push(app.student.roll);
+      });
 
       // Get array of students who are NOT 'unplaced'
       const students = await strapi.db.query('api::student.student').findMany({
@@ -311,13 +324,26 @@ module.exports = createCoreController("api::student.student", ({ strapi }) => ({
             placed_status: "unplaced"
           }
         },
-        select: ["roll"]
+        select: ["roll", "placed_status"]
       });
 
-      const offcampus_placed = students.map(student => student["roll"]);
+      const offcampus_placed = {
+        "placed_a1": [],
+        "placed_a2": [],
+        "placed_x": []
+      };
+      
+      students.forEach(student => {
+        // Note: Assuming student.placed_status is one of "placed_a1", "placed_a2", "placed_x"
+        offcampus_placed[student.placed_status].push(student.roll);
+      });
 
       // merge unique rolls from oncampus_placed and offcampus_placed
-      const placed_rolls = Array.from(new Set([...oncampus_placed, ...offcampus_placed]));
+      const placed_rolls = {
+        "placed_a1": [...new Set([...oncampus_placed.placed_a1, ...offcampus_placed.placed_a1])],
+        "placed_a2": [...new Set([...oncampus_placed.placed_a2, ...offcampus_placed.placed_a2])],
+        "placed_x": [...new Set([...oncampus_placed.placed_x, ...offcampus_placed.placed_x])]
+      };
 
       ctx.body = { placed: placed_rolls };
       return;
