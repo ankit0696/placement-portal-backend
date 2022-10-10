@@ -70,7 +70,7 @@ module.exports = {
         // Instead of silently returning false, I am throwing an error, this may
         // cause some 500s initially, but will likely reduce silent eligibility
         // bugs in the long run
-        const { id, X_marks, XII_marks, cpi, registered_for, course, placed_status, internship_status } = student;
+        const { id, X_marks, XII_marks, cpi, registered_for, course, placed_status, placed_status_updated, internship_status } = student;
         if (!id || !X_marks || !XII_marks || !cpi || !registered_for || !course ) {
             throw `Some mandatory parameters not passed, or are null: ${student, job}`;
         }
