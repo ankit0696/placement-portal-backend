@@ -215,6 +215,9 @@
     "placed_status_updated": {
       "type": "datetime",
       "unique": false
+    },
+    "cover_letter_link": {
+      "type": "string"
     }
   }
 }
