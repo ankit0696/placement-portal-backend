@@ -21,6 +21,16 @@
       "type": "boolean",
       "default": true,
       "required": true
+    },
+    "tpc_guidelines": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
     }
   }
 }
